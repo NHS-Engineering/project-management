@@ -38,6 +38,12 @@
 			alert("failed to delete project");
 		}
 	}
+
+	async function getTasks() {
+		let resp = await fetch(`/api/tasks/list/${project.id}`);
+		let tasks = await resp.json();
+		return tasks["tasks"];
+	}
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -55,6 +61,22 @@
 {#if modal_visible}
 	<Modal on:close={() => modal_visible = false}>
 		<p>project: {project.name}</p>
+		{#await getTasks()}
+			<p>fetching tasks...</p>
+		{:then tasks}
+			{#if tasks.length >= 1}
+				<p>tasks:</p>
+				<ul>
+					{#each tasks as task}
+						<li>{task["name"]}</li>
+					{/each}
+				</ul>
+			{:else}
+				<p>this project has no tasks</p>
+			{/if}
+		{:catch}
+			<p>failed to fetch tasks</p>
+		{/await}
 		{#if jwt !== ""}
 			<button on:click={deleteProject}>Delete</button>
 		{/if}

@@ -2,6 +2,7 @@
 	import { users } from "./stores.js";
 	import { fetchUser } from "./users.js";
 	import Modal from "./Modal.svelte";
+	import Task from "./Task.svelte";
 	import { createEventDispatcher } from "svelte";
 
 	export let project;
@@ -68,7 +69,7 @@
 				<p>tasks:</p>
 				<ul>
 					{#each tasks as task}
-						<li>{task["name"]}</li>
+						<Task {task}/>
 					{/each}
 				</ul>
 			{:else}

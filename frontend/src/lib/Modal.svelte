@@ -20,7 +20,7 @@
 <div class="modal-background" on:click={close}></div>
 
 <div class="modal">
-	<slot></slot>
+	<slot/>
 </div>
 
 <style>

@@ -5,20 +5,31 @@ use crate::{get_conn, jwt::JWTAuth};
 use crate::models::{NewTask, Task};
 
 #[rocket::post("/new/<project_id>/<name>")]
-pub fn new(jwt: JWTAuth, project_id: i32, name: String) {
+pub fn new(jwt: JWTAuth, project_id: i32, name: String) -> (Status, &'static str) {
+	use crate::schema::projects;
 	use crate::schema::tasks;
 
 	let mut conn = get_conn();
 
-	let new_project = NewTask {
+	let new_task = NewTask {
 		name,
 		project_id,
 		assignee_id: jwt.user_id
 	};
 
-	diesel::insert_into(tasks::table)
-		.values(&new_project)
-		.execute(&mut conn).unwrap();
+	let owner_id: i32 = projects::table.find(project_id)
+		.select(projects::dsl::owner_id).first(&mut conn).unwrap();
+
+	match jwt.user_id == owner_id {
+		true => {
+			diesel::insert_into(tasks::table)
+				.values(&new_task)
+				.execute(&mut conn).unwrap();
+
+			(Status::Ok, "created task")
+		},
+		false => (Status::Forbidden, "you must own a project to create tasks for it")
+	}
 }
 
 #[derive(Serialize)]
@@ -56,9 +67,9 @@ pub fn delete(jwt: JWTAuth, id: i32) -> (Status, &'static str) {
 		.filter(projects::dsl::owner_id.eq(jwt.user_id)))
 	))).execute(&mut conn);
 
-	match deleted {
-		Ok(n) if n == 1 => (Status::Ok, "task deleted"),
-		Err(_) => (Status::BadRequest, "task not deleted"),
+	match deleted.unwrap() {
+		0 => (Status::BadRequest, "no tasks deleted"),
+		1 => (Status::Ok, "task deleted"),
 		_ => unreachable!("multiple tasks deleted?")
 	}
 }

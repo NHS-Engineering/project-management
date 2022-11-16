@@ -1,14 +1,14 @@
 use diesel::sqlite::SqliteConnection;
 use diesel::Connection;
 
-#[cfg(feature = "debug")]
-pub fn get_conn() -> SqliteConnection {
-	SqliteConnection::establish("file:db.sqlite").unwrap()
-}
-
-#[cfg(not(feature = "debug"))]
+#[cfg(feature = "prod_db")]
 pub fn get_conn() -> SqliteConnection {
 	SqliteConnection::establish("file:/home/engineer/db.sqlite").unwrap()
+}
+
+#[cfg(not(feature = "prod_db"))]
+pub fn get_conn() -> SqliteConnection {
+	SqliteConnection::establish("file:db.sqlite").unwrap()
 }
 
 pub fn run_migrations() {

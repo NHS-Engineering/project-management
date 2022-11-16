@@ -45,6 +45,28 @@
 		let tasks = await resp.json();
 		return tasks["tasks"];
 	}
+
+	let tasks = getTasks();
+
+	async function refreshTasks() {
+		tasks = getTasks();
+		return tasks;
+	}
+
+	async function newTask() {
+		let resp = await fetch(`/api/tasks/new/${project.id}/name`, {
+			"method": "POST",
+			"headers": {
+				"jwt": jwt
+			}
+		})
+
+		if (resp.ok) {
+			refreshTasks();
+		} else {
+			alert("failed to create task")
+		}
+	}
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -62,14 +84,14 @@
 {#if modal_visible}
 	<Modal on:close={() => modal_visible = false}>
 		<p>project: {project.name}</p>
-		{#await getTasks()}
+		{#await tasks}
 			<p>fetching tasks...</p>
 		{:then tasks}
 			{#if tasks.length >= 1}
 				<p>tasks:</p>
 				<ul>
 					{#each tasks as task}
-						<Task {task}/>
+						<Task {jwt} {task} on:deleted={refreshTasks}/>
 					{/each}
 				</ul>
 			{:else}
@@ -79,7 +101,8 @@
 			<p>failed to fetch tasks</p>
 		{/await}
 		{#if jwt !== ""}
-			<button on:click={deleteProject}>Delete</button>
+			<button on:click={newTask}>New Task</button>
+			<button on:click={deleteProject}>Delete Project</button>
 		{/if}
 	</Modal>
 {/if}

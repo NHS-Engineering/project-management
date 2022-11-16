@@ -40,6 +40,9 @@
 				# disable debugging and static stuff
 				buildNoDefaultFeatures = true;
 
+				# use production db
+				buildFeatures = ["prod_db"];
+
 				src = ./.;
 
 				cargoLock.lockFile = ./Cargo.lock;

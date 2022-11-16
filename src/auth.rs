@@ -3,7 +3,6 @@ use diesel::prelude::*;
 use jwt_simple::prelude::*;
 use engineering_web_portal::get_conn;
 use rocket::http::Status;
-use crate::models::NewUser;
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -12,8 +11,10 @@ pub struct UserInfo<'a> {
 	password: &'a str
 }
 
+#[cfg(feature = "debug")]
 #[rocket::post("/signup", data = "<user_info>")]
 pub fn signup(user_info: Json<UserInfo<'_>>) {
+	use crate::models::NewUser;
 	use sha3::{Sha3_512, Digest};
 	use crate::schema::users;
 
@@ -28,6 +29,12 @@ pub fn signup(user_info: Json<UserInfo<'_>>) {
 	diesel::insert_into(users::table)
 		.values(&new_user)
 		.execute(&mut conn).unwrap();
+}
+
+#[cfg(not(feature = "debug"))]
+#[rocket::post("/signup")]
+pub fn signup() -> (Status, &'static str) {
+	(Status::ImATeapot, "signup is only enabled in debug mode")
 }
 
 #[rocket::post("/login", data = "<user_info>")]

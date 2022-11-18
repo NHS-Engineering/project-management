@@ -27,7 +27,6 @@
 					nightlyRust.rust
 					unstable-pkgs.diesel-cli
 					pkgs.sqlite
-					pkgs.nodejs
 					pkgs.yarn
 					deploy-rs.defaultPackage.x86_64-linux
 				];

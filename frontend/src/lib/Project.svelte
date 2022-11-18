@@ -68,7 +68,10 @@
 	$: if (modal_visible) { maybeRefreshTasks() }
 
 	async function newTask() {
-		let resp = await fetch(`/api/tasks/new/${project.id}/name`, {
+		// TODO: make more visually appealing
+		const task_name = prompt("what is the name of your task?");
+
+		let resp = await fetch(`/api/tasks/new/${project.id}/${task_name}`, {
 			"method": "POST",
 			"headers": {
 				"jwt": jwt

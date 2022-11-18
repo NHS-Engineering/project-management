@@ -48,6 +48,8 @@
 		<div class="list">
 			{#each projects as project}
 				<Project {project} {jwt} on:action={refreshProjects}/>
+			{:else}
+				<p>no projects exist</p>
 			{/each}
 		</div>
 	{:catch}

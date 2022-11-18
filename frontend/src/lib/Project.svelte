@@ -87,16 +87,14 @@
 		{#await tasks}
 			<p>fetching tasks...</p>
 		{:then tasks}
-			{#if tasks.length >= 1}
-				<p>tasks:</p>
-				<ul>
-					{#each tasks as task}
-						<Task {jwt} {task} on:deleted={refreshTasks}/>
-					{/each}
-				</ul>
-			{:else}
-				<p>this project has no tasks</p>
-			{/if}
+			<p>tasks:</p>
+			<ul>
+				{#each tasks as task}
+					<Task {jwt} {task} on:deleted={refreshTasks}/>
+				{:else}
+					<p>this project has no tasks</p>
+				{/each}
+			</ul>
 		{:catch}
 			<p>failed to fetch tasks</p>
 		{/await}

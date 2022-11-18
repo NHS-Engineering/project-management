@@ -49,19 +49,23 @@
 	let tasks = new Promise((resolve) => resolve([]));
 	let last_updated = 0;
 
-	async function refreshTasks() {
+	async function forceRefreshTasks() {
+		tasks = getTasks();
+	}
+
+	async function maybeRefreshTasks() {
 		const expire = 1000 * 15; // 15 seconds
 
 		let new_time = new Date().getTime();
 		if (new_time - last_updated > expire) {
-			tasks = getTasks();
+			forceRefreshTasks();
 			last_updated = new_time;
 		}
 
 		return tasks;
 	}
 
-	$: if (modal_visible) { refreshTasks() }
+	$: if (modal_visible) { maybeRefreshTasks() }
 
 	async function newTask() {
 		let resp = await fetch(`/api/tasks/new/${project.id}/name`, {
@@ -72,7 +76,7 @@
 		})
 
 		if (resp.ok) {
-			refreshTasks();
+			forceRefreshTasks();
 		} else {
 			alert("failed to create task")
 		}
@@ -81,7 +85,7 @@
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-mouse-events-have-key-events -->
-<div on:click={() => modal_visible=true} on:mouseover={refreshTasks} class="box">
+<div on:click={() => modal_visible=true} on:mouseover={maybeRefreshTasks} class="box">
 	<p>{project.name}</p>
 	{#await user}
 		<p>fetching info...</p>
@@ -101,7 +105,7 @@
 			<p>tasks:</p>
 			<ul>
 				{#each tasks as task}
-					<Task {jwt} {task} on:deleted={refreshTasks}/>
+					<Task {jwt} {task} on:deleted={forceRefreshTasks}/>
 				{:else}
 					<p>this project has no tasks</p>
 				{/each}

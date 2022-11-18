@@ -37,7 +37,7 @@
 				version = "0.1.0";
 				buildInputs = [pkgs.sqlite];
 
-				# disable debugging and static stuff
+				# disable debugging
 				buildNoDefaultFeatures = true;
 
 				# use production db

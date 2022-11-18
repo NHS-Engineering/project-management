@@ -33,8 +33,12 @@ fn rocket() -> _ {
 		.mount("/api/projects", rocket::routes![projects::new, projects::list, projects::delete])
 		.mount("/api/tasks", rocket::routes![tasks::new, tasks::list, tasks::delete]);
 
-	#[cfg(feature = "static")]
-	let application = application.mount("/", rocket::fs::FileServer::from("frontend/dist"));
+	let application = application.mount("/",
+		rocket::fs::FileServer::from(match std::env::var("OVERRIDE_STATIC") {
+			Ok(path) => path,
+			Err(_) => String::from("frontend/dist")
+		})
+	);
 
 	#[cfg(feature = "debug")]
 	let application = application.mount("/api/debug", rocket::routes![get_users]);

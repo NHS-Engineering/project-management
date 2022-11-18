@@ -28,6 +28,7 @@
 					unstable-pkgs.diesel-cli
 					pkgs.sqlite
 					pkgs.nodejs
+					pkgs.yarn
 					deploy-rs.defaultPackage.x86_64-linux
 				];
 			};
@@ -48,6 +49,16 @@
 				cargoLock.lockFile = ./Cargo.lock;
 			};
 
+			packages.x86_64-linux.frontend = pkgs.mkYarnPackage {
+				pname = "frontend";
+				version = "0.0.0";
+
+				src = ./frontend;
+
+				buildPhase = "yarn --offline build";
+				distPhase = "true";
+			};
+
 			deploy.nodes.aws = {
 				hostname = "nhse.zerdle.net";
 				profiles.system = {
@@ -55,8 +66,11 @@
 					user = "engineer";
 					path = deploy-rs.lib.x86_64-linux.activate.custom packages.x86_64-linux.default ''
 						screen -XS server quit || true
-						ROCKET_ADDRESS=0.0.0.0 screen -L -Logfile /tmp/server.log -S server -m -d ./bin/engineering-web-portal
-						curl http://nhse.zerdle.net:8000/api/projects/list
+						export OVERRIDE_STATIC=${packages.x86_64-linux.frontend}/libexec/frontend/deps/frontend/dist
+						export ROCKET_ADDRESS=0.0.0.0
+						screen -L -Logfile /tmp/server.log -S server -m -d ./bin/engineering-web-portal
+						curl -s http://nhse.zerdle.net:8000
+						curl -s http://nhse.zerdle.net:8000/api/projects/list
 					'';
 				};
 			};

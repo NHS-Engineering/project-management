@@ -46,12 +46,22 @@
 		return tasks["tasks"];
 	}
 
-	let tasks = getTasks();
+	let tasks = new Promise((resolve) => resolve([]));
+	let last_updated = 0;
 
 	async function refreshTasks() {
-		tasks = getTasks();
+		const expire = 1000 * 15; // 15 seconds
+
+		let new_time = new Date().getTime();
+		if (new_time - last_updated > expire) {
+			tasks = getTasks();
+			last_updated = new_time;
+		}
+
 		return tasks;
 	}
+
+	$: if (modal_visible) { refreshTasks() }
 
 	async function newTask() {
 		let resp = await fetch(`/api/tasks/new/${project.id}/name`, {
@@ -70,7 +80,8 @@
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div on:click={() => modal_visible=true} class="box">
+<!-- svelte-ignore a11y-mouse-events-have-key-events -->
+<div on:click={() => modal_visible=true} on:mouseover={refreshTasks} class="box">
 	<p>{project.name}</p>
 	{#await user}
 		<p>fetching info...</p>

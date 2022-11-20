@@ -80,7 +80,7 @@
 					user = "engineer";
 					path = deploy-rs.lib.x86_64-linux.activate.custom (fullstack true) ''
 						screen -XS server quit || true
-						screen -L -Logfile /tmp/server.log -S server -m -d ./bin/fullstack
+						screen -L -Logfile /tmp/server.log -S server -m -d $PROFILE/bin/fullstack
 						curl -s http://nhse.zerdle.net:8000
 						curl -s http://nhse.zerdle.net:8000/api/projects/list
 					'';

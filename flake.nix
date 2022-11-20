@@ -30,7 +30,7 @@
 			buildPhase = "yarn --offline build";
 			distPhase = "true";
 		};
-		in let backend = use_prod_db: rustPlatform.buildRustPackage {
+		in let backend = rustPlatform.buildRustPackage {
 			pname = "engineering-web-portal";
 			version = "0.1.0";
 			buildInputs = [pkgs.sqlite];
@@ -38,21 +38,18 @@
 			# disable debugging
 			buildNoDefaultFeatures = true;
 
-			# use production db
-			buildFeatures = pkgs.lib.optional use_prod_db "prod_db";
-
 			src = ./.;
 
 			cargoLock.lockFile = ./Cargo.lock;
 		};
-		in let fullstack = use_prod_db: pkgs.stdenv.mkDerivation {
+		in let fullstack = pkgs.stdenv.mkDerivation {
 			name = "fullstack";
 			src = frontend;
 
 			installPhase = ''
 				mkdir -p $out/bin
 				cp libexec/frontend/deps/frontend/dist $out/frontend -r
-				cp ${backend use_prod_db}/bin/engineering-web-portal $out/bin/backend
+				cp ${backend}/bin/engineering-web-portal $out/bin/backend
 				echo "#!/bin/bash" > $out/bin/fullstack
 				echo "export OVERRIDE_STATIC=$out/frontend" >> $out/bin/fullstack
 				echo "export ROCKET_ADDRESS=0.0.0.0" >> $out/bin/fullstack
@@ -71,15 +68,16 @@
 				];
 			};
 
-			packages.x86_64-linux.default = fullstack false;
+			packages.x86_64-linux.default = fullstack;
 
 			deploy.nodes.aws = {
 				hostname = "nhse.zerdle.net";
 				profiles.system = {
 					sshUser = "root";
 					user = "engineer";
-					path = deploy-rs.lib.x86_64-linux.activate.custom (fullstack true) ''
+					path = deploy-rs.lib.x86_64-linux.activate.custom fullstack ''
 						screen -XS server quit || true
+						export OVERRIDE_DB=file:/home/engineer/db.sqlite
 						screen -L -Logfile /tmp/server.log -S server -m -d $PROFILE/bin/fullstack
 						curl -s http://nhse.zerdle.net:8000
 						curl -s http://nhse.zerdle.net:8000/api/projects/list

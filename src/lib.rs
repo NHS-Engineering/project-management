@@ -2,14 +2,13 @@ use diesel::sqlite::SqliteConnection;
 use diesel::{Connection, RunQueryDsl};
 use diesel::dsl::sql_query;
 
-#[cfg(feature = "prod_db")]
-const DB: &'static str = "file:/home/engineer/db.sqlite";
-
-#[cfg(not(feature = "prod_db"))]
-const DB: &'static str = "file:db.sqlite";
-
 pub fn get_conn() -> SqliteConnection {
-	let mut conn = SqliteConnection::establish(DB).unwrap();
+	let db = match std::env::var("OVERRIDE_DB") {
+		Ok(overridden_db) => overridden_db,
+		Err(_) => String::from("file:db.sqlite")
+	};
+
+	let mut conn = SqliteConnection::establish(&db).unwrap();
 	sql_query("PRAGMA foreign_keys = ON;").execute(&mut conn).unwrap();
 	conn
 }

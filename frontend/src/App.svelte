@@ -6,6 +6,21 @@
 	let showLogin = false;
 	let jwt = "";
 
+	function setJwt(event) {
+		jwt = event.detail;
+
+		const parts = jwt.split(".");
+		const claims = JSON.parse(atob(parts[1]));
+
+		const now = new Date().getTime();
+		const delta_expires = (claims["exp"] * 1000) - now;
+
+		setTimeout(() => {
+			jwt = "";
+			console.debug("session expired");
+		}, delta_expires);
+	}
+
 	async function getProjects() {
 		let projects = await fetch("/api/projects/list");
 		projects = await projects.json();
@@ -30,7 +45,7 @@
 	</nav>
 
 	{#if showLogin}
-		<Login on:close={() => showLogin = false} on:success={(e) => jwt = e.detail}/>
+		<Login on:close={() => showLogin = false} on:success={setJwt}/>
 	{/if}
 
 	<button on:click={refreshProjects}>Refresh</button>

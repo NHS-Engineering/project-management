@@ -53,6 +53,7 @@
 				echo "#!/bin/bash" > $out/bin/fullstack
 				echo "export OVERRIDE_STATIC=$out/frontend" >> $out/bin/fullstack
 				echo "export ROCKET_ADDRESS=0.0.0.0" >> $out/bin/fullstack
+				echo "export ROCKET_LOG_LEVEL=normal" >> $out/bin/fullstack
 				echo "$out/bin/backend" >> $out/bin/fullstack
 				chmod +x $out/bin/fullstack
 			'';

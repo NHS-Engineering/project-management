@@ -79,7 +79,7 @@
 					path = deploy-rs.lib.x86_64-linux.activate.custom fullstack ''
 						screen -XS server quit || true
 						export OVERRIDE_DB=file:/home/engineer/db.sqlite
-						screen -L -Logfile /tmp/server.log -S server -m -d $PROFILE/bin/fullstack
+						screen -L -Logfile /tmp/server.log -S server -m -d ${fullstack}/bin/fullstack
 						curl -s http://nhse.zerdle.net:8000
 						curl -s http://nhse.zerdle.net:8000/api/projects/list
 					'';

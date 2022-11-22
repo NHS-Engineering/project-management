@@ -31,7 +31,7 @@ fn rocket() -> _ {
 		.mount("/api/users", rocket::routes![users::info])
 		.mount("/api/auth", rocket::routes![auth::signup, auth::login])
 		.mount("/api/projects", rocket::routes![projects::new, projects::list, projects::delete])
-		.mount("/api/tasks", rocket::routes![tasks::new, tasks::list, tasks::delete]);
+		.mount("/api/tasks", rocket::routes![tasks::new, tasks::list, tasks::delete, tasks::set_done]);
 
 	let application = application.mount("/",
 		rocket::fs::FileServer::from(match std::env::var("OVERRIDE_STATIC") {

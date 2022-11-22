@@ -62,7 +62,7 @@ pub fn delete(jwt: JWTAuth, id: i32) -> (Status, &'static str) {
 
 	// I think I deserve the Nobel Peace Prize for writing this query
 	// deletes if the user is the owner of the project which the task is a part of
-	let deleted = diesel::delete(tasks::dsl::tasks::filter(tasks::table, tasks::dsl::id.eq(id).and(
+	let deleted = diesel::delete(tasks::dsl::tasks.filter(tasks::dsl::id.eq(id).and(
 		tasks::dsl::project_id.eq_any(projects::dsl::projects.select(projects::dsl::id)
 		.filter(projects::dsl::owner_id.eq(jwt.user_id)))
 	))).execute(&mut conn);
@@ -72,4 +72,15 @@ pub fn delete(jwt: JWTAuth, id: i32) -> (Status, &'static str) {
 		1 => (Status::Ok, "task deleted"),
 		_ => unreachable!("multiple tasks deleted?")
 	}
+}
+
+#[rocket::post("/set_done/<id>/<state>")]
+pub fn set_done(jwt: JWTAuth, id: i32, state: bool) {
+	use crate::schema::tasks;
+
+	let mut conn = get_conn();
+
+	diesel::update(tasks::dsl::tasks.find(id).filter(tasks::dsl::assignee_id.eq(jwt.user_id)))
+		.set(tasks::dsl::done.eq(state))
+		.execute(&mut conn).unwrap();
 }

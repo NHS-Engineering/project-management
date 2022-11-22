@@ -23,6 +23,7 @@
 
 <li>
 	{task.name}
+	<input type="checkbox" bind:checked={task.done} disabled>
 	{#if jwt !== ""}
 		<button on:click={deleteTask}>Delete Task</button>
 	{/if}

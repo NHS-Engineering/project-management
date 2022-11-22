@@ -3,7 +3,7 @@ mod models;
 mod jwt;
 
 use jwt_simple::prelude::*;
-use engineering_web_portal::{get_conn, run_migrations};
+use engineering_web_portal::{get_conn, run_migrations, copyright_message};
 
 #[cfg(feature = "debug")]
 #[rocket::get("/users")]
@@ -24,6 +24,8 @@ mod tasks;
 
 #[rocket::launch]
 fn rocket() -> _ {
+	copyright_message();
+
 	run_migrations();
 
 	let application = rocket::build()

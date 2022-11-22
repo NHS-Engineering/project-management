@@ -2,6 +2,12 @@ use diesel::sqlite::SqliteConnection;
 use diesel::{Connection, RunQueryDsl};
 use diesel::dsl::sql_query;
 
+pub fn copyright_message() {
+	println!("Copyright 2022 NHS Engineering Club.");
+	println!("Licensed under the GNU Affero General Public License version 3 (https://www.gnu.org/licenses/agpl-3.0.en.html).");
+	println!("Source code may be found at https://github.com/NHS-Engineering/project-management.");
+}
+
 fn _get_conn() -> SqliteConnection {
 	let db = match std::env::var("OVERRIDE_DB") {
 		Ok(overridden_db) => overridden_db,

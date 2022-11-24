@@ -70,11 +70,11 @@
 	{:catch}
 		<p>could not fetch projects</p>
 	{/await}
-
-	<div class="copyright">
-		Copyright 2022 NHS Engineering Club.  Licensed under the <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">GNU Affero General Public License version 3</a>.  Source code may be found <a href="https://github.com/NHS-Engineering/project-management">here</a>.
-	</div>
 </main>
+
+<div class="copyright">
+	Copyright 2022 NHS Engineering Club.  Licensed under the <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">GNU Affero General Public License version 3</a>.  Source code may be found <a href="https://github.com/NHS-Engineering/project-management">here</a>.
+</div>
 
 <style>
 	nav {
@@ -90,6 +90,7 @@
 	}
 
 	.copyright {
+		left: 0;
 		position: fixed;
 		bottom: 0;
 		width: 100%;

@@ -94,5 +94,6 @@
 		bottom: 0;
 		width: 100%;
 		text-align: center;
+		font-size: .8em;
 	}
 </style>

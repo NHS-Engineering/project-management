@@ -51,10 +51,10 @@
 	<button on:click={refreshProjects}>Refresh</button>
 	{#if jwt !== ""}
 		<button on:click={() => showNewProject = true}>New Project</button>
-	{/if}
 
-	{#if showNewProject}
-		<NewProject {jwt} on:close={() => showNewProject = false} on:success={refreshProjects}/>
+		{#if showNewProject}
+			<NewProject {jwt} on:close={() => showNewProject = false} on:success={refreshProjects}/>
+		{/if}
 	{/if}
 
 	{#await projects}

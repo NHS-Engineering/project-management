@@ -31,12 +31,13 @@
 		wantedBy = [ "multi-user.target" ];
 		after = [ "network.target" ];
 
-		path = [ fullstack ];
 		environment = {
 			OVERRIDE_DB = "file:/home/engineer/db.sqlite";
 		};
-		script = "fullstack";
-		serviceConfig.User = "engineer";
+		serviceConfig = {
+			User = "engineer";
+			ExecStart = "${fullstack}/bin/fullstack";
+		};
 	};
 
 	system.stateVersion = "22.05";

@@ -1,13 +1,12 @@
 {
 	inputs = {
-		nixpkgs.url = "github:nixos/nixpkgs/release-22.05";
-		nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
+		nixpkgs.url = "github:nixos/nixpkgs/release-22.11";
 		mozilla.url = "github:mozilla/nixpkgs-mozilla";
 		deploy-rs.url = "github:serokell/deploy-rs";
 		nix-filter.url = "github:numtide/nix-filter";
 	};
 
-	outputs = { self, nixpkgs, nixpkgs-unstable, mozilla, deploy-rs, nix-filter }:
+	outputs = { self, nixpkgs, mozilla, deploy-rs, nix-filter }:
 		let pkgs = import nixpkgs {
 			system = "x86_64-linux";
 			overlays = [
@@ -15,7 +14,6 @@
 				nix-filter.overlays.default
 			];
 		};
-		in let unstable-pkgs = import nixpkgs-unstable { system = "x86_64-linux"; };
 		in let nightlyRust = (pkgs.rustChannelOf {
 			date = "2022-11-07";
 			channel = "nightly";
@@ -37,7 +35,7 @@
 		in let backend = rustPlatform.buildRustPackage {
 			pname = "engineering-web-portal";
 			version = "0.1.0";
-			buildInputs = [unstable-pkgs.sqlite];
+			buildInputs = [pkgs.sqlite];
 
 			# disable debugging
 			buildNoDefaultFeatures = true;
@@ -75,8 +73,8 @@
 			devShells.x86_64-linux.default = pkgs.mkShell {
 				buildInputs = [
 					nightlyRust.rust
-					unstable-pkgs.diesel-cli
-					unstable-pkgs.sqlite
+					pkgs.diesel-cli
+					pkgs.sqlite
 					pkgs.yarn
 					deploy-rs.defaultPackage.x86_64-linux
 				];

@@ -47,6 +47,7 @@
 
 	systemd.services.fullstack = {
 		before = [ "nginx.service" ];
+		wantedBy = [ "multi-user.target" ];
 
 		environment = {
 			OVERRIDE_DB = "file:/home/engineer/db.sqlite";

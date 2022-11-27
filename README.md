@@ -7,7 +7,7 @@
 run `cargo run` in the base folder
 
 # deployment notes
-- frustrating out of memory sigterm occurs if less than 1GB of RAM
+- frustrating out of memory sigterm occurs if less than 1GB of RAM (if using remote build)
 - to set email for ACME place it in `.letsencrypt_email.txt`, then run `git add --intent-to-add .letsencrypt_email.txt -f && git update-index --assume-unchanged .letsencrypt_email.txt`
 
 # sqlite notes

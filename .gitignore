@@ -1,3 +1,4 @@
 /target
 /db.sqlite
 /result
+/.letsencrypt_email.txt

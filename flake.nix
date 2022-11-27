@@ -63,7 +63,6 @@
 				cp ${backend}/bin/engineering-web-portal $out/bin/backend
 				echo "#!/bin/bash" > $out/bin/fullstack
 				echo "export OVERRIDE_STATIC=$out/frontend" >> $out/bin/fullstack
-				echo "export ROCKET_ADDRESS=0.0.0.0" >> $out/bin/fullstack
 				echo "export ROCKET_LOG_LEVEL=normal" >> $out/bin/fullstack
 				echo "$out/bin/backend" >> $out/bin/fullstack
 				chmod +x $out/bin/fullstack
@@ -94,6 +93,7 @@
 
 						modules = [ ./ec2.nix ];
 						specialArgs = {
+							domain = self.deploy.nodes.aws.hostname;
 							inherit fullstack;
 						};
 					});

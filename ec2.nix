@@ -1,4 +1,4 @@
-### https://nixos.org/channels/nixos-22.05 nixos
+### https://nixos.org/channels/nixos-22.11 nixos
 { pkgs, modulesPath, ... }:
 {
 	imports = [ (modulesPath + "/virtualisation/amazon-image.nix") ];

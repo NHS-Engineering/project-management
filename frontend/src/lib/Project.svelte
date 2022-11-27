@@ -3,7 +3,7 @@
 	import { fetchUser } from "./users.js";
 	import Modal from "./Modal.svelte";
 	import Task from "./Task.svelte";
-	import { createEventDispatcher } from "svelte";
+	import { createEventDispatcher, onMount } from "svelte";
 
 	export let project;
 	export let jwt;
@@ -89,11 +89,27 @@
 			alert("failed to create task")
 		}
 	}
+
+	// fetch tasks if 20% visible
+	const observer = new IntersectionObserver((entries) => {
+		if (entries[0].isIntersecting) {
+			maybeRefreshTasks();
+		}
+	}, {
+		root: null,
+		rootMargin: "0px",
+		threshold: 0.2
+	});
+
+	let projectBox;
+	onMount(() => {
+		observer.observe(projectBox);
+	});
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-mouse-events-have-key-events -->
-<div on:click={() => modal_visible=true} on:mouseover={maybeRefreshTasks} class="box">
+<div on:click={() => modal_visible=true} on:mouseover={maybeRefreshTasks} class="box" bind:this={projectBox}>
 	<p>{project.name}</p>
 	{#await user}
 		<p>fetching info...</p>

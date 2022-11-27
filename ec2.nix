@@ -1,7 +1,7 @@
 ### https://nixos.org/channels/nixos-22.05 nixos
-{ pkgs, ... }:
+{ pkgs, modulesPath, ... }:
 {
-	imports = [ <nixpkgs/nixos/modules/virtualisation/amazon-image.nix> ];
+	imports = [ (modulesPath + "/virtualisation/amazon-image.nix") ];
 	ec2.hvm = true;
 
 	environment.systemPackages = with pkgs; [

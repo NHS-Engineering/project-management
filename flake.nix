@@ -4,12 +4,16 @@
 		nixpkgs-unstable.url = "github:nixos/nixpkgs/nixpkgs-unstable";
 		mozilla.url = "github:mozilla/nixpkgs-mozilla";
 		deploy-rs.url = "github:serokell/deploy-rs";
+		nix-filter.url = "github:numtide/nix-filter";
 	};
 
-	outputs = { self, nixpkgs, nixpkgs-unstable, mozilla, deploy-rs }:
+	outputs = { self, nixpkgs, nixpkgs-unstable, mozilla, deploy-rs, nix-filter }:
 		let pkgs = import nixpkgs {
 			system = "x86_64-linux";
-			overlays = [mozilla.overlay];
+			overlays = [
+				mozilla.overlay
+				nix-filter.overlays.default
+			];
 		};
 		in let unstable-pkgs = import nixpkgs-unstable { system = "x86_64-linux"; };
 		in let nightlyRust = (pkgs.rustChannelOf {
@@ -33,12 +37,21 @@
 		in let backend = rustPlatform.buildRustPackage {
 			pname = "engineering-web-portal";
 			version = "0.1.0";
-			buildInputs = [pkgs.sqlite];
+			buildInputs = [unstable-pkgs.sqlite];
 
 			# disable debugging
 			buildNoDefaultFeatures = true;
 
-			src = ./.;
+			src = pkgs.nix-filter {
+				root = ./.;
+
+				include = [
+					"src"
+					"Cargo.toml"
+					"Cargo.lock"
+					"migrations"
+				];
+			};
 
 			cargoLock.lockFile = ./Cargo.lock;
 		};
@@ -63,7 +76,7 @@
 				buildInputs = [
 					nightlyRust.rust
 					unstable-pkgs.diesel-cli
-					pkgs.sqlite
+					unstable-pkgs.sqlite
 					pkgs.yarn
 					deploy-rs.defaultPackage.x86_64-linux
 				];

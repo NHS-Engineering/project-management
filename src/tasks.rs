@@ -4,7 +4,7 @@ use rocket::http::Status;
 use crate::{get_conn, jwt::JWTAuth};
 use crate::models::{NewTask, Task};
 
-#[rocket::post("/new/<project_id>/<name>")]
+#[rocket::post("/new/<project_id>", data = "<name>")]
 pub fn new(jwt: JWTAuth, project_id: i32, name: String) -> (Status, &'static str) {
 	use crate::schema::projects;
 	use crate::schema::tasks;

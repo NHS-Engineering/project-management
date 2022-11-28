@@ -76,11 +76,12 @@
 			return;
 		}
 
-		let resp = await fetch(`/api/tasks/new/${project.id}/${task_name}`, {
+		let resp = await fetch(`/api/tasks/new/${project.id}`, {
 			"method": "POST",
 			"headers": {
 				"jwt": jwt
-			}
+			},
+			"body": task_name
 		})
 
 		if (resp.ok) {

@@ -18,11 +18,12 @@
 	let name = "";
 
 	async function newProject() {
-		let resp = await fetch(`/api/projects/new/${name}`, {
+		let resp = await fetch(`/api/projects/new`, {
 			"method": "POST",
 			"headers": {
 				"jwt": jwt
-			}
+			},
+			"body": name
 		});
 
 		if (resp.ok) {

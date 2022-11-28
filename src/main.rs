@@ -32,7 +32,7 @@ fn rocket() -> _ {
 		.manage(HS256Key::generate())
 		.mount("/api/users", rocket::routes![users::info])
 		.mount("/api/auth", rocket::routes![auth::signup, auth::login])
-		.mount("/api/projects", rocket::routes![projects::new, projects::list, projects::delete])
+		.mount("/api/projects", rocket::routes![projects::new, projects::list, projects::delete, projects::set_color])
 		.mount("/api/tasks", rocket::routes![tasks::new, tasks::list, tasks::delete, tasks::set_done]);
 
 	let application = application.mount("/",

@@ -106,11 +106,15 @@
 	onMount(() => {
 		observer.observe(projectBox);
 	});
+
+	let colorOverride = (project.color === null) ? null : `background-color: ${project.color}`;
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-mouse-events-have-key-events -->
-<div on:click={() => modal_visible=true} on:mouseover={maybeRefreshTasks} class="box" bind:this={projectBox}>
+<div on:click={() => modal_visible=true} on:mouseover={maybeRefreshTasks} bind:this={projectBox}
+	class="box" style={colorOverride}>
+
 	<p>{project.name}</p>
 	{#await user}
 		<p>fetching info...</p>

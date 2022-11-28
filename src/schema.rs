@@ -5,6 +5,7 @@ diesel::table! {
         id -> Integer,
         name -> Text,
         owner_id -> Integer,
+        color -> Nullable<Text>,
     }
 }
 

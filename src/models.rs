@@ -20,7 +20,8 @@ pub struct NewUser<'a> {
 pub struct Project {
 	pub id: i32,
 	pub name: String,
-	pub owner_id: i32
+	pub owner_id: i32,
+	pub color: Option<String>
 }
 
 #[derive(Insertable)]

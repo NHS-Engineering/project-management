@@ -107,7 +107,22 @@
 		observer.observe(projectBox);
 	});
 
-	let colorOverride = (project.color === null) ? null : `background-color: ${project.color}`;
+	$: colorOverride = (project.color === null) ? null : `background-color: ${project.color}`;
+
+	async function updateColor(event) {
+		let resp = await fetch(`/api/projects/set_color/${project.id}`, {
+			"method": "POST",
+			"headers": {
+				"jwt": jwt
+			},
+			"body": project.color
+		});
+
+		if (!resp.ok) {
+			dispatch("action");
+			alert("failed to change project color");
+		}
+	}
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -128,6 +143,9 @@
 {#if modal_visible}
 	<Modal on:close={() => modal_visible = false}>
 		<p>project: {project.name}</p>
+		{#if jwt !== ""}
+			<input type="color" bind:value={project.color} on:input={updateColor}>
+		{/if}
 		{#await tasks}
 			<p>fetching tasks...</p>
 		{:then tasks}

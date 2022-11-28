@@ -61,7 +61,7 @@ pub fn set_color(jwt: JWTAuth, id: i32, color: String) -> (Status, &'static str)
 		return (Status::BadRequest, "color expected to start with '#'");
 	}
 
-	let valid_chars = color_chars.map(|c| c.is_ascii_hexdigit() && c.is_ascii_lowercase());
+	let valid_chars = color_chars.map(|c| c.is_ascii_hexdigit() && (c.is_ascii_lowercase() || c.is_ascii_digit()));
 
 	let mut char_count = 0;
 	for valid in valid_chars {

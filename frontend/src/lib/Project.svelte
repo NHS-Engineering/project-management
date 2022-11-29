@@ -107,7 +107,7 @@
 		observer.observe(projectBox);
 	});
 
-	$: colorOverride = (project.color === null) ? null : `background-color: ${project.color}`;
+	let projectColor = (project.color === null) ? "#444444" : project.color;
 
 	async function updateColor(event) {
 		let resp = await fetch(`/api/projects/set_color/${project.id}`, {
@@ -115,7 +115,7 @@
 			"headers": {
 				"jwt": jwt
 			},
-			"body": project.color
+			"body": projectColor
 		});
 
 		if (!resp.ok) {
@@ -128,7 +128,7 @@
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <!-- svelte-ignore a11y-mouse-events-have-key-events -->
 <div on:click={() => modal_visible=true} on:mouseover={maybeRefreshTasks} bind:this={projectBox}
-	class="box" style={colorOverride}>
+	class="box" style={`background-color: ${projectColor}`}>
 
 	<p>{project.name}</p>
 	{#await user}
@@ -144,7 +144,7 @@
 	<Modal on:close={() => modal_visible = false}>
 		<p>project: {project.name}</p>
 		{#if jwt !== ""}
-			<input type="color" bind:value={project.color} on:change={updateColor}>
+			<input type="color" bind:value={projectColor} on:change={updateColor}>
 		{/if}
 		{#await tasks}
 			<p>fetching tasks...</p>
@@ -170,7 +170,6 @@
 <style>
 	.box {
 		user-select: none;
-		background-color: #444444;
 		margin-top: 1em;
 		margin-right: 1em;
 		padding-left: 1em;

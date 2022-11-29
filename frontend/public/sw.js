@@ -11,7 +11,7 @@ self.addEventListener("install", function(event) {
 // network first then defer to cache unless non-GET or otherwise specified
 self.addEventListener("fetch", function(event) {
 	event.respondWith(fetch(event.request).then(function(response) {
-		if (event.request.method === "GET" && event.request.headers.get("Cache-Control") !== "no-cache") {
+		if (event.request.method === "GET") {
 			caches.open(cache_name).then(function(cache) {
 				cache.add(event.request);
 			});

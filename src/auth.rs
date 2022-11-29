@@ -3,6 +3,7 @@ use diesel::prelude::*;
 use jwt_simple::prelude::*;
 use engineering_web_portal::get_conn;
 use rocket::http::Status;
+use crate::jwt::{JWTKeys, JWTAuth, JWTNewAccount};
 
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
@@ -34,11 +35,11 @@ pub fn signup(user_info: Json<UserInfo<'_>>) {
 #[cfg(not(feature = "debug"))]
 #[rocket::post("/signup")]
 pub fn signup() -> (Status, &'static str) {
-	(Status::ImATeapot, "signup is only enabled in debug mode")
+	(Status::ImATeapot, "signup is only enabled in debug mode, try the invite system instead")
 }
 
 #[rocket::post("/login", data = "<user_info>")]
-pub fn login(user_info: Json<UserInfo<'_>>, key: &rocket::State<HS256Key>) -> (Status, String) {
+pub fn login(user_info: Json<UserInfo<'_>>, keyring: &rocket::State<JWTKeys>) -> (Status, String) {
 	use sha3::{Sha3_512, Digest};
 	use crate::schema::users::dsl::*;
 
@@ -53,12 +54,50 @@ pub fn login(user_info: Json<UserInfo<'_>>, key: &rocket::State<HS256Key>) -> (S
 
 	match password_correct {
 		true => {
-			let user_auth = crate::jwt::JWTAuth {
+			let user_auth = JWTAuth {
 				user_id
 			};
 			let claims = Claims::with_custom_claims(user_auth, Duration::from_mins(5));
-			(Status::Ok, key.authenticate(claims).unwrap())
+			(Status::Ok, keyring.user_key.authenticate(claims).unwrap())
 		},
 		false => (Status::Forbidden, String::from("incorrect password"))
 	}
+}
+
+#[rocket::post("/invite", data = "<username>")]
+pub fn invite(jwt: JWTAuth, username: String, keyring: &rocket::State<JWTKeys>) -> (Status, String) {
+	// TODO: check admin field
+	if jwt.user_id != 1 {
+		return (Status::Forbidden, String::from("you are not permitted to invite users"));
+	}
+
+	let key = &keyring.new_account_key;
+
+	let invitation = JWTNewAccount {
+		username
+	};
+	let claims = Claims::with_custom_claims(invitation, Duration::from_mins(2));
+	let new_jwt = key.authenticate(claims).unwrap();
+	(Status::Ok, new_jwt)
+}
+
+#[rocket::post("/redeem_invite", data = "<password>")]
+pub fn redeem_invite(jwt: JWTNewAccount, password: String) {
+	use crate::models::NewUser;
+	use sha3::{Sha3_512, Digest};
+	use crate::schema::users;
+
+	// yes I'm aware, but probably not that big of a deal tbh
+	let hashed_password = format!("{:x}", Sha3_512::digest(password));
+
+	let new_user = NewUser {
+		username: &jwt.username,
+		hashed_password
+	};
+
+	let mut conn = get_conn();
+
+	diesel::insert_into(users::table)
+		.values(&new_user)
+		.execute(&mut conn).unwrap();
 }

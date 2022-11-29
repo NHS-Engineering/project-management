@@ -2,7 +2,6 @@ mod schema;
 mod models;
 mod jwt;
 
-use jwt_simple::prelude::*;
 use engineering_web_portal::{get_conn, run_migrations, copyright_message};
 
 #[cfg(feature = "debug")]
@@ -29,9 +28,9 @@ fn rocket() -> _ {
 	run_migrations();
 
 	let application = rocket::build()
-		.manage(HS256Key::generate())
+		.manage(jwt::JWTKeys::generate())
 		.mount("/api/users", rocket::routes![users::info])
-		.mount("/api/auth", rocket::routes![auth::signup, auth::login])
+		.mount("/api/auth", rocket::routes![auth::signup, auth::login, auth::invite, auth::redeem_invite])
 		.mount("/api/projects", rocket::routes![projects::new, projects::list, projects::delete, projects::set_color])
 		.mount("/api/tasks", rocket::routes![tasks::new, tasks::list, tasks::delete, tasks::set_done]);
 

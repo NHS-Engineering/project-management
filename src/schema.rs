@@ -12,10 +12,10 @@ diesel::table! {
 diesel::table! {
     tasks (id) {
         id -> Integer,
-        name -> Text,
         project_id -> Integer,
         assignee_id -> Nullable<Integer>,
         done -> Bool,
+        name -> Text,
     }
 }
 

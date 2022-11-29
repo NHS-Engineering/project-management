@@ -35,10 +35,10 @@ pub struct NewProject {
 #[serde(crate = "rocket::serde")]
 pub struct Task {
 	pub id: i32,
-	pub name: String,
 	pub project_id: i32,
 	pub assignee_id: Option<i32>,
-	pub done: bool
+	pub done: bool,
+	pub name: String
 }
 
 #[derive(Insertable)]

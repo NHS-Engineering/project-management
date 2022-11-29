@@ -39,7 +39,7 @@
 <Modal on:close={close}>
 	<form on:submit|preventDefault={login}>
 		<!-- svelte-ignore a11y-autofocus -->
-		<input autofocus placeholder="username" type="text" bind:value={username} required>
+		<input autofocus placeholder="username" type="text" bind:value={username} required autocapitalize="off">
 		<input placeholder="password" type="password" bind:value={password} required>
 		<input type="submit" value="Login">
 	</form>

@@ -30,3 +30,10 @@ pub fn run_migrations() {
 	let mut conn = _get_conn();
 	conn.run_pending_migrations(MIGRATIONS).unwrap();
 }
+
+pub fn get_url() -> String {
+	match std::env::var("OVERRIDE_URL") {
+		Ok(overridden_url) => overridden_url,
+		Err(_) => String::from("http://127.0.0.1:8000")
+	}
+}

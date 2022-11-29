@@ -2,6 +2,8 @@
 	import Login from "./lib/Login.svelte";
 	import NewProject from "./lib/NewProject.svelte";
 	import Project from "./lib/Project.svelte";
+	import Invite from "./lib/Invite.svelte";
+	import CreateAccount from "./lib/CreateAccount.svelte";
 
 	let showLogin = false;
 	let jwt = "";
@@ -38,6 +40,8 @@
 	}
 
 	let showNewProject = false;
+
+	let invite_jwt = new URL(window.location.href).searchParams.get("invite");
 </script>
 
 <main>
@@ -45,11 +49,17 @@
 		<h1>Projects List</h1>
 		{#if jwt === ""}
 			<button on:click={() => showLogin = true}>Login</button>
+		{:else}
+			<Invite {jwt}/>
 		{/if}
 	</nav>
 
 	{#if showLogin}
 		<Login on:close={() => showLogin = false} on:success={setJwt}/>
+	{/if}
+
+	{#if invite_jwt !== null}
+		<CreateAccount {invite_jwt}/>
 	{/if}
 
 	<button on:click={refreshProjects}>Refresh</button>

@@ -1,7 +1,7 @@
 use rocket::serde::{Deserialize, json::Json};
 use diesel::prelude::*;
 use jwt_simple::prelude::*;
-use engineering_web_portal::get_conn;
+use engineering_web_portal::{get_conn, get_url};
 use rocket::http::{Status, ContentType};
 use crate::jwt::{JWTKeys, JWTAuth, JWTNewAccount};
 
@@ -83,7 +83,11 @@ pub fn invite(jwt: JWTAuth, username: String, keyring: &rocket::State<JWTKeys>) 
 	let claims = Claims::with_custom_claims(invitation, Duration::from_mins(2));
 	let new_jwt = key.authenticate(claims).unwrap();
 
-	let qrcode = QRBuilder::new(new_jwt).ecl(ECL::H).build().unwrap();
+	let mut invite_url = get_url();
+	invite_url.push_str("/?invite=");
+	invite_url.push_str(&new_jwt);
+
+	let qrcode = QRBuilder::new(invite_url).ecl(ECL::H).build().unwrap();
 	let qr_svg = SvgBuilder::default().to_str(&qrcode);
 
 	(Status::Ok, (ContentType::SVG, qr_svg))

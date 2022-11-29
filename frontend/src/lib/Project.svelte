@@ -144,7 +144,7 @@
 	<Modal on:close={() => modal_visible = false}>
 		<p>project: {project.name}</p>
 		{#if jwt !== ""}
-			<input type="color" bind:value={project.color} on:input={updateColor}>
+			<input type="color" bind:value={project.color} on:change={updateColor}>
 		{/if}
 		{#await tasks}
 			<p>fetching tasks...</p>

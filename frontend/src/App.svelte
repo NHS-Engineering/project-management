@@ -21,16 +21,20 @@
 		}, delta_expires);
 	}
 
-	async function getProjects() {
-		let projects = await fetch("/api/projects/list");
+	async function getProjects(no_cache) {
+		let projects = await fetch("/api/projects/list", no_cache ? {
+			"headers": {
+				"Cache-Control": "no-cache"
+			}
+		} : {});
 		projects = await projects.json();
 		return projects["projects"];
 	}
 
-	let projects = getProjects();
+	let projects = getProjects(false);
 
 	function refreshProjects() {
-		projects = getProjects();
+		projects = getProjects(true);
 	}
 
 	let showNewProject = false;

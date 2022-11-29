@@ -1,0 +1,10 @@
+{
+	"name": "Project Management - NHS Engineering Club",
+	"start_url": "/",
+	"display": "standalone",
+	"icons": [{
+		"src": "/vite.svg",
+		"sizes": "any",
+		"type": "image/svg+xml"
+	}]
+}

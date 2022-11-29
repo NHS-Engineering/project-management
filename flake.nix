@@ -80,6 +80,8 @@
 			};
 
 			packages.x86_64-linux.default = fullstack;
+			packages.x86_64-linux.backend = backend;
+			packages.x86_64-linux.frontend = frontend;
 
 			deploy.nodes.aws = {
 				hostname = "nhse.zerdle.net";

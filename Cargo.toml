@@ -28,6 +28,10 @@ version = "2.0"
 default-features = false
 features = ["sqlite"]
 
+[dependencies.fast_qr]
+version = "0.6"
+features = ["svg"]
+
 [features]
 default = ["debug", "rebuild-static"]
 debug = []

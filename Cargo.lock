@@ -430,10 +430,20 @@ dependencies = [
  "constant_time_eq",
  "diesel",
  "diesel_migrations",
+ "fast_qr",
  "jwt-simple",
  "libsqlite3-sys",
  "rocket",
  "sha3",
+]
+
+[[package]]
+name = "fast_qr"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1567f9472e73c7eb6d31fab9f5caa106632608401bc8642cf6c232d3d5825902"
+dependencies = [
+ "wasm-bindgen",
 ]
 
 [[package]]

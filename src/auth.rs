@@ -2,7 +2,7 @@ use rocket::serde::{Deserialize, json::Json};
 use diesel::prelude::*;
 use jwt_simple::prelude::*;
 use engineering_web_portal::get_conn;
-use rocket::http::Status;
+use rocket::http::{Status, ContentType};
 use crate::jwt::{JWTKeys, JWTAuth, JWTNewAccount};
 
 #[derive(Deserialize)]
@@ -65,10 +65,14 @@ pub fn login(user_info: Json<UserInfo<'_>>, keyring: &rocket::State<JWTKeys>) ->
 }
 
 #[rocket::post("/invite", data = "<username>")]
-pub fn invite(jwt: JWTAuth, username: String, keyring: &rocket::State<JWTKeys>) -> (Status, String) {
+pub fn invite(jwt: JWTAuth, username: String, keyring: &rocket::State<JWTKeys>) -> (Status, (ContentType, String)) {
+	use fast_qr::ECL;
+	use fast_qr::qr::QRBuilder;
+	use fast_qr::convert::svg::SvgBuilder;
+
 	// TODO: check admin field
 	if jwt.user_id != 1 {
-		return (Status::Forbidden, String::from("you are not permitted to invite users"));
+		return (Status::Forbidden, (ContentType::Plain, String::from("you are not permitted to invite users")));
 	}
 
 	let key = &keyring.new_account_key;
@@ -78,7 +82,11 @@ pub fn invite(jwt: JWTAuth, username: String, keyring: &rocket::State<JWTKeys>) 
 	};
 	let claims = Claims::with_custom_claims(invitation, Duration::from_mins(2));
 	let new_jwt = key.authenticate(claims).unwrap();
-	(Status::Ok, new_jwt)
+
+	let qrcode = QRBuilder::new(new_jwt).ecl(ECL::H).build().unwrap();
+	let qr_svg = SvgBuilder::default().to_str(&qrcode);
+
+	(Status::Ok, (ContentType::SVG, qr_svg))
 }
 
 #[rocket::post("/redeem_invite", data = "<password>")]

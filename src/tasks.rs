@@ -75,12 +75,18 @@ pub fn delete(jwt: JWTAuth, id: i32) -> (Status, &'static str) {
 }
 
 #[rocket::post("/set_done/<id>/<state>")]
-pub fn set_done(jwt: JWTAuth, id: i32, state: bool) {
+pub fn set_done(jwt: JWTAuth, id: i32, state: bool) -> (Status, &'static str) {
 	use crate::schema::tasks;
 
 	let mut conn = get_conn();
 
-	diesel::update(tasks::dsl::tasks.find(id).filter(tasks::dsl::assignee_id.eq(jwt.user_id)))
+	let changed = diesel::update(tasks::dsl::tasks.find(id).filter(tasks::dsl::assignee_id.eq(jwt.user_id)))
 		.set(tasks::dsl::done.eq(state))
 		.execute(&mut conn).unwrap();
+
+	match changed {
+		0 => (Status::BadRequest, "no tasks changed"),
+		1 => (Status::Ok, "task changed"),
+		_ => unreachable!("multiple tasks changed?")
+	}
 }

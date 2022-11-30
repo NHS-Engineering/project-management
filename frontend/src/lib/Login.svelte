@@ -1,6 +1,7 @@
 <script>
 	import Modal from "./Modal.svelte";
 	import { createEventDispatcher } from "svelte";
+	import { jwt } from "./stores";
 
 	const dispatch = createEventDispatcher();
 
@@ -8,8 +9,20 @@
 	    dispatch("close");
 	}
 
-	function success(jwt) {
-	    dispatch("success", jwt);
+	function success(new_jwt) {
+		const parts = new_jwt.split(".");
+		const claims = JSON.parse(atob(parts[1]));
+
+		const now = new Date().getTime();
+		const delta_expires = (claims["exp"] * 1000) - now;
+
+		setTimeout(() => {
+			jwt.set("");
+			console.debug("session expired");
+		}, delta_expires);
+
+		jwt.set(new_jwt);
+
 	    dispatch("close");
 	}
 

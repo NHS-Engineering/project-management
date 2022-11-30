@@ -1,8 +1,7 @@
 <script>
 	import Modal from "./Modal.svelte";
 	import { createEventDispatcher } from "svelte";
-
-	export let jwt;
+	import { jwt } from "./stores.js";
 
 	const dispatch = createEventDispatcher();
 
@@ -21,7 +20,7 @@
 		let resp = await fetch(`/api/projects/new`, {
 			"method": "POST",
 			"headers": {
-				"jwt": jwt
+				"jwt": $jwt
 			},
 			"body": name
 		});

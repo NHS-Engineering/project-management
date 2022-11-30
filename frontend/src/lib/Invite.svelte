@@ -1,7 +1,6 @@
 <script>
 	import Modal from "./Modal.svelte";
-
-	export let jwt;
+	import { jwt } from "./stores.js";
 
 	let show = false;
 
@@ -14,7 +13,7 @@
 		let resp = await fetch("/api/auth/invite", {
 			"method": "POST",
 			"headers": {
-				"jwt": jwt
+				"jwt": $jwt
 			},
 			"body": username
 		});
@@ -36,6 +35,7 @@
 		<input placeholder="username" type="text" bind:value={username} required autocapitalize="off">
 		<input type="submit" value="Create Invite">
 		{#if qr !== ""}
+			<!-- svelte-ignore a11y-missing-attribute -->
 			<img src={qr}/>
 		{/if}
 	</form>

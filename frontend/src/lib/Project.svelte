@@ -1,12 +1,11 @@
 <script>
-	import { users } from "./stores.js";
+	import { users, jwt } from "./stores.js";
 	import { fetchUser } from "./users.js";
 	import Modal from "./Modal.svelte";
 	import Task from "./Task.svelte";
 	import { createEventDispatcher, onMount } from "svelte";
 
 	export let project;
-	export let jwt;
 
 	const dispatch = createEventDispatcher();
 
@@ -29,7 +28,7 @@
 		let resp = await fetch(`/api/projects/delete/${project.id}`, {
 			"method": "DELETE",
 			"headers": {
-				"jwt": jwt
+				"jwt": $jwt
 			}
 		});
 
@@ -79,7 +78,7 @@
 		let resp = await fetch(`/api/tasks/new/${project.id}`, {
 			"method": "POST",
 			"headers": {
-				"jwt": jwt
+				"jwt": $jwt
 			},
 			"body": task_name
 		})
@@ -113,7 +112,7 @@
 		let resp = await fetch(`/api/projects/set_color/${project.id}`, {
 			"method": "POST",
 			"headers": {
-				"jwt": jwt
+				"jwt": $jwt
 			},
 			"body": projectColor
 		});
@@ -143,7 +142,7 @@
 {#if modal_visible}
 	<Modal on:close={() => modal_visible = false}>
 		<p>project: {project.name}</p>
-		{#if jwt !== ""}
+		{#if $jwt !== ""}
 			<input type="color" bind:value={projectColor} on:change={updateColor}>
 		{/if}
 		{#await tasks}
@@ -152,7 +151,7 @@
 			<p>tasks:</p>
 			<ul>
 				{#each tasks as task}
-					<Task {jwt} {task} on:deleted={forceRefreshTasks}/>
+					<Task {task} on:deleted={forceRefreshTasks}/>
 				{:else}
 					<p>this project has no tasks</p>
 				{/each}
@@ -160,7 +159,7 @@
 		{:catch}
 			<p>failed to fetch tasks</p>
 		{/await}
-		{#if jwt !== ""}
+		{#if $jwt !== ""}
 			<button on:click={newTask}>New Task</button>
 			<button on:click={deleteProject}>Delete Project</button>
 		{/if}

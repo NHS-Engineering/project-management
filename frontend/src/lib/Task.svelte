@@ -1,7 +1,7 @@
 <script>
 	import { createEventDispatcher } from "svelte";
+	import { jwt } from "./stores.js";
 	export let task;
-	export let jwt;
 
 	const dispatch = createEventDispatcher();
 
@@ -9,7 +9,7 @@
 		let resp = await fetch(`/api/tasks/delete/${task.id}`, {
 			"method": "DELETE",
 			"headers": {
-				"jwt": jwt
+				"jwt": $jwt
 			}
 		});
 
@@ -24,7 +24,7 @@
 		let resp = await fetch(`/api/tasks/set_done/${task.id}/${!task.done}`, {
 			"method": "POST",
 			"headers": {
-				"jwt": jwt
+				"jwt": $jwt
 			}
 		});
 
@@ -33,14 +33,12 @@
 			alert("failed to mark task as done");
 		}
 	}
-
-	$: isLoggedIn = jwt !== "";
 </script>
 
 <li>
 	{task.name}
-	<input type="checkbox" bind:checked={task.done} on:input={setDone} disabled={!isLoggedIn}>
-	{#if isLoggedIn}
+	<input type="checkbox" bind:checked={task.done} on:input={setDone} disabled={$jwt === ""}>
+	{#if $jwt !== ""}
 		<button on:click={deleteTask}>Delete Task</button>
 	{/if}
 </li>

@@ -5,23 +5,9 @@
 	import Invite from "./lib/Invite.svelte";
 	import CreateAccount from "./lib/CreateAccount.svelte";
 
+	import { jwt } from "./lib/stores.js";
+
 	let showLogin = false;
-	let jwt = "";
-
-	function setJwt(event) {
-		jwt = event.detail;
-
-		const parts = jwt.split(".");
-		const claims = JSON.parse(atob(parts[1]));
-
-		const now = new Date().getTime();
-		const delta_expires = (claims["exp"] * 1000) - now;
-
-		setTimeout(() => {
-			jwt = "";
-			console.debug("session expired");
-		}, delta_expires);
-	}
 
 	async function getProjects(no_cache) {
 		let projects = await fetch("/api/projects/list", no_cache ? {
@@ -47,15 +33,15 @@
 <main>
 	<nav>
 		<h1>Projects List</h1>
-		{#if jwt === ""}
+		{#if $jwt === ""}
 			<button on:click={() => showLogin = true}>Login</button>
 		{:else}
-			<Invite {jwt}/>
+			<Invite/>
 		{/if}
 	</nav>
 
 	{#if showLogin}
-		<Login on:close={() => showLogin = false} on:success={setJwt}/>
+		<Login on:close={() => showLogin = false}/>
 	{/if}
 
 	{#if invite_jwt !== null}
@@ -63,11 +49,11 @@
 	{/if}
 
 	<button on:click={refreshProjects}>Refresh</button>
-	{#if jwt !== ""}
+	{#if $jwt !== ""}
 		<button on:click={() => showNewProject = true}>New Project</button>
 
 		{#if showNewProject}
-			<NewProject {jwt} on:close={() => showNewProject = false} on:success={refreshProjects}/>
+			<NewProject on:close={() => showNewProject = false} on:success={refreshProjects}/>
 		{/if}
 	{/if}
 
@@ -76,7 +62,7 @@
 	{:then projects}
 		<div class="list">
 			{#each projects as project}
-				<Project {project} {jwt} on:action={refreshProjects}/>
+				<Project {project} on:action={refreshProjects}/>
 			{:else}
 				<p>no projects exist</p>
 			{/each}

@@ -51,6 +51,7 @@
 
 		environment = {
 			OVERRIDE_DB = "file:/home/engineer/db.sqlite";
+			OVERRIDE_URL = "https://${domain}";
 		};
 		serviceConfig = {
 			User = "engineer";

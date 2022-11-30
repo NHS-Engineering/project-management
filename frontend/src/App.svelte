@@ -5,7 +5,7 @@
 	import Invite from "./lib/Invite.svelte";
 	import CreateAccount from "./lib/CreateAccount.svelte";
 
-	import { jwt } from "./lib/stores.js";
+	import { jwt, invite_jwt } from "./lib/stores.js";
 
 	let showLogin = false;
 
@@ -27,7 +27,7 @@
 
 	let showNewProject = false;
 
-	let invite_jwt = new URL(window.location.href).searchParams.get("invite");
+	invite_jwt.set(new URL(window.location.href).searchParams.get("invite"));
 </script>
 
 <main>
@@ -44,8 +44,8 @@
 		<Login on:close={() => showLogin = false}/>
 	{/if}
 
-	{#if invite_jwt !== null}
-		<CreateAccount {invite_jwt}/>
+	{#if $invite_jwt !== null}
+		<CreateAccount/>
 	{/if}
 
 	<button on:click={refreshProjects}>Refresh</button>

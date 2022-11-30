@@ -87,6 +87,9 @@ pub fn invite(jwt: JWTAuth, username: String, keyring: &rocket::State<JWTKeys>) 
 	invite_url.push_str("/?invite=");
 	invite_url.push_str(&new_jwt);
 
+	#[cfg(feature = "debug")]
+	println!("[debug] invite url: {}", invite_url);
+
 	let qrcode = QRBuilder::new(invite_url).ecl(ECL::H).build().unwrap();
 	let qr_svg = SvgBuilder::default().to_str(&qrcode);
 

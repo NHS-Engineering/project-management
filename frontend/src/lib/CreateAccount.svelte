@@ -1,9 +1,9 @@
 <script>
 	import Modal from "./Modal.svelte";
+	import { login } from "./login.js";
+	import { invite_jwt } from "./stores.js";
 
-	export let invite_jwt;
-
-	let invite_claims = JSON.parse(atob(invite_jwt.split(".")[1]));
+	let invite_claims = JSON.parse(atob($invite_jwt.split(".")[1]));
 
 	let password = "";
 	let password_confirm = "";
@@ -17,7 +17,7 @@
 		let resp = await fetch("/api/auth/redeem_invite", {
 			"method": "POST",
 			"headers": {
-				"jwt": invite_jwt
+				"jwt": $invite_jwt
 			},
 			"body": password
 		});
@@ -28,7 +28,15 @@
 		}
 
 		alert("successfully created account");
-		document.location.href = "/"; // TODO: don't reload page
+
+		await login(invite_claims["username"], password);
+
+		// just to be safe...
+		password = "";
+		password_confirm = "";
+
+		history.replaceState(null, "", "/");
+		invite_jwt.set(null);
 	}
 </script>
 

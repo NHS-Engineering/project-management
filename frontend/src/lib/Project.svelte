@@ -1,5 +1,5 @@
 <script>
-	import { users, jwt } from "./stores.js";
+	import { jwt } from "./stores.js";
 	import { fetchUser } from "./users.js";
 	import Modal from "./Modal.svelte";
 	import Task from "./Task.svelte";
@@ -9,18 +9,7 @@
 
 	const dispatch = createEventDispatcher();
 
-	users.update(users => {
-		if (!users.hasOwnProperty(project.owner_id)) {
-			users[project.owner_id] = fetchUser(project.owner_id);
-		}
-
-		return users;
-	});
-
-	let user;
-	users.subscribe(users => {
-		user = users[project.owner_id]
-	});
+	let user = fetchUser(project.owner_id);
 
 	let modal_visible = false;
 

@@ -4,8 +4,8 @@
 	import Project from "./lib/Project.svelte";
 	import Invite from "./lib/Invite.svelte";
 	import CreateAccount from "./lib/CreateAccount.svelte";
-
-	import { jwt, invite_jwt } from "./lib/stores.js";
+	import { fetchUser } from "./lib/users.js";
+	import { jwt, jwt_claims, invite_jwt } from "./lib/stores.js";
 
 	let showLogin = false;
 
@@ -28,6 +28,8 @@
 	let showNewProject = false;
 
 	invite_jwt.set(new URL(window.location.href).searchParams.get("invite"));
+
+	$: self_user = fetchUser($jwt_claims["user_id"]);
 </script>
 
 <main>
@@ -36,7 +38,16 @@
 		{#if $jwt === ""}
 			<button on:click={() => showLogin = true}>Login</button>
 		{:else}
-			<Invite/>
+			<div>
+				{#await self_user}
+					<p>Logged in as ...</p>
+				{:then self_user}
+					<p>Logged in as: {self_user.username}</p>
+				{:catch}
+					<p>Logged in as ???</p>
+				{/await}
+				<Invite/>
+			</div>
 		{/if}
 	</nav>
 

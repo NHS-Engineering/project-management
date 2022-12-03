@@ -2,8 +2,9 @@
 	import Modal from "./Modal.svelte";
 	import { login } from "./login.js";
 	import { invite_jwt } from "./stores.js";
+	import { get_jwt_claims } from "./jwt.js";
 
-	let invite_claims = JSON.parse(atob($invite_jwt.split(".")[1]));
+	let invite_claims = get_jwt_claims($invite_jwt);
 
 	let password = "";
 	let password_confirm = "";

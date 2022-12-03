@@ -1,4 +1,5 @@
-import { jwt } from "./stores.js";
+import { jwt, jwt_claims } from "./stores.js";
+import { get } from "svelte/store";
 
 export async function login(username, password) {
 	let resp = await fetch("/api/auth/login", {
@@ -19,16 +20,13 @@ export async function login(username, password) {
 }
 
 function setJwt(new_jwt) {
-	const parts = new_jwt.split(".");
-	const claims = JSON.parse(atob(parts[1]));
+	jwt.set(new_jwt);
 
 	const now = new Date().getTime();
-	const delta_expires = (claims["exp"] * 1000) - now;
+	const delta_expires = (get(jwt_claims)["exp"] * 1000) - now;
 
 	setTimeout(() => {
 		jwt.set("");
 		console.debug("session expired");
 	}, delta_expires);
-
-	jwt.set(new_jwt);
 }

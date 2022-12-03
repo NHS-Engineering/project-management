@@ -46,7 +46,10 @@
 				{:catch}
 					<p>Logged in as ???</p>
 				{/await}
-				<Invite/>
+
+				{#if $jwt_claims["user_id"] === 1}
+					<Invite/>
+				{/if}
 			</div>
 		{/if}
 	</nav>

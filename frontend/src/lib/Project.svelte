@@ -1,5 +1,5 @@
 <script>
-	import { jwt } from "./stores.js";
+	import { jwt, jwt_claims } from "./stores.js";
 	import { fetchUser } from "./users.js";
 	import Modal from "./Modal.svelte";
 	import Task from "./Task.svelte";
@@ -111,6 +111,8 @@
 			alert("failed to change project color");
 		}
 	}
+
+	$: isOwner = $jwt_claims["user_id"] === project.owner_id;
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -131,7 +133,7 @@
 {#if modal_visible}
 	<Modal on:close={() => modal_visible = false}>
 		<p>project: {project.name}</p>
-		{#if $jwt !== ""}
+		{#if isOwner}
 			<input type="color" bind:value={projectColor} on:change={updateColor}>
 		{/if}
 		{#await tasks}
@@ -140,7 +142,7 @@
 			<p>tasks:</p>
 			<ul>
 				{#each tasks as task}
-					<Task {task} on:deleted={forceRefreshTasks}/>
+					<Task {task} {isOwner} on:deleted={forceRefreshTasks}/>
 				{:else}
 					<p>this project has no tasks</p>
 				{/each}
@@ -149,8 +151,12 @@
 			<p>failed to fetch tasks</p>
 		{/await}
 		{#if $jwt !== ""}
-			<button on:click={newTask}>New Task</button>
-			<button on:click={deleteProject}>Delete Project</button>
+			{#if isOwner}
+				<button on:click={newTask}>New Task</button>
+				<button on:click={deleteProject}>Delete Project</button>
+			{:else}
+				<p>you are not the owner of this project so you can't manage it</p>
+			{/if}
 		{/if}
 	</Modal>
 {/if}

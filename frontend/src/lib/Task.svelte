@@ -1,7 +1,8 @@
 <script>
 	import { createEventDispatcher } from "svelte";
-	import { jwt } from "./stores.js";
+	import { jwt, jwt_claims } from "./stores.js";
 	export let task;
+	export let isOwner;
 
 	const dispatch = createEventDispatcher();
 
@@ -33,12 +34,14 @@
 			alert("failed to mark task as done");
 		}
 	}
+
+	$: isAssigned = $jwt_claims["user_id"] === task.assignee_id;
 </script>
 
 <li>
 	{task.name}
-	<input type="checkbox" bind:checked={task.done} on:input={setDone} disabled={$jwt === ""}>
-	{#if $jwt !== ""}
+	<input type="checkbox" bind:checked={task.done} on:input={setDone} disabled={!isAssigned}>
+	{#if isOwner}
 		<button on:click={deleteTask}>Delete Task</button>
 	{/if}
 </li>

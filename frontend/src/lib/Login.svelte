@@ -20,7 +20,7 @@
 	}
 </script>
 
-<Modal on:close={close}>
+<Modal on:close={() => dispatch("close")}>
 	<form on:submit|preventDefault={handleLogin}>
 		<!-- svelte-ignore a11y-autofocus -->
 		<input autofocus placeholder="username" type="text" bind:value={username} required autocapitalize="off">

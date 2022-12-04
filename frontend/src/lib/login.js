@@ -1,5 +1,5 @@
-import { jwt, jwt_claims } from "./stores.js";
-import { get } from "svelte/store";
+import { jwt } from "./stores.js";
+import { get_jwt_claims } from "./jwt.js";
 
 export async function login(username, password) {
 	let resp = await fetch("/api/auth/login", {
@@ -29,12 +29,13 @@ export async function login(username, password) {
 }
 
 function setJwt(new_jwt) {
-	jwt.set(new_jwt);
+	const jwt_claims = get_jwt_claims(new_jwt);
 
-	const now = Date.new();
-	const delta_expires = (get(jwt_claims)["exp"] * 1000) - now;
+	const now = Date.now();
+	const delta_expires = (jwt_claims["exp"] * 1000) - now;
 
-	const delta_at = (get(jwt_claims)["iat"] * 1000) - now;
+	const delta_at = (jwt_claims["iat"] * 1000) - now;
+	console.log(delta_at);
 	if (Math.abs(delta_at) > 10 * 1000) {
 		alert("your computer's clock is wrong, you may experience problems with this site");
 	}
@@ -43,6 +44,8 @@ function setJwt(new_jwt) {
 		logout();
 		console.debug("session expired");
 	}, delta_expires);
+
+	jwt.set(new_jwt);
 }
 
 export function logout() {

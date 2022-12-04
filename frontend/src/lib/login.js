@@ -31,8 +31,13 @@ export async function login(username, password) {
 function setJwt(new_jwt) {
 	jwt.set(new_jwt);
 
-	const now = new Date().getTime();
+	const now = Date.new();
 	const delta_expires = (get(jwt_claims)["exp"] * 1000) - now;
+
+	const delta_at = (get(jwt_claims)["iat"] * 1000) - now;
+	if (Math.abs(delta_at) > 10 * 1000) {
+		alert("your computer's clock is wrong, you may experience problems with this site");
+	}
 
 	setTimeout(() => {
 		logout();

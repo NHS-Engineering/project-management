@@ -14,6 +14,15 @@ export async function login(username, password) {
 		throw "failed to login";
 	}
 
+	if ("PasswordCredential" in window) {
+		const cred = new PasswordCredential({
+			id: username,
+			password: password
+		});
+
+		await navigator.credentials.store(cred);
+	}
+
 	let jwt = await resp.text();
 
 	setJwt(jwt);

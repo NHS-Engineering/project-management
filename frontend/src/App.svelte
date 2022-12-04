@@ -6,6 +6,7 @@
 	import CreateAccount from "./lib/CreateAccount.svelte";
 	import { fetchUser } from "./lib/users.js";
 	import { jwt, jwt_claims, invite_jwt } from "./lib/stores.js";
+	import { login } from "./lib/login.js";
 
 	let showLogin = false;
 
@@ -30,6 +31,21 @@
 	invite_jwt.set(new URL(window.location.href).searchParams.get("invite"));
 
 	$: self_user = fetchUser($jwt_claims["user_id"]);
+
+	if ("PasswordCredential" in window) {
+		navigator.credentials.get({
+			"password": true,
+			"mediation": "optional"
+		}).then(creds => {
+			if (creds !== null) {
+				try {
+					login(creds.id, creds.password);
+				} catch {
+					alert("failed to log you in automatically, manually log in with correct password to fix");
+				}
+			}
+		});
+	}
 </script>
 
 <main>

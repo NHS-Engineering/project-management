@@ -8,8 +8,6 @@
 	import { jwt, jwt_claims, invite_jwt } from "./lib/stores.js";
 	import { login, logout, manualLogout } from "./lib/login.js";
 
-	let showLogin = false;
-
 	async function getProjects(no_cache) {
 		let projects = await fetch("/api/projects/list", no_cache ? {
 			"headers": {
@@ -76,7 +74,7 @@
 		<h1>Projects List</h1>
 		{#if $jwt === ""}
 			{#if online}
-				<button on:click={() => showLogin = true}>Login</button>
+				<Login/>
 			{:else}
 				<p>you are currently offline</p>
 			{/if}
@@ -97,10 +95,6 @@
 			</div>
 		{/if}
 	</nav>
-
-	{#if showLogin}
-		<Login on:close={() => showLogin = false}/>
-	{/if}
 
 	{#if $invite_jwt !== null}
 		<CreateAccount/>

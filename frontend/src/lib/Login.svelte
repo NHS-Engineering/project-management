@@ -3,7 +3,7 @@
 	import { createEventDispatcher } from "svelte";
 	import { login } from "./login.js";
 
-	const dispatch = createEventDispatcher();
+	let show = false;
 
 	let username = "";
 	let password = "";
@@ -13,24 +13,27 @@
 		try {
 			await login(username, password);
 			password = ""; // just to be safe
-			dispatch("close");
 		} catch {
 			failed = true;
 		}
 	}
 </script>
 
-<Modal on:close={() => dispatch("close")}>
-	<form on:submit|preventDefault={handleLogin}>
-		<!-- svelte-ignore a11y-autofocus -->
-		<input autofocus placeholder="username" type="text" bind:value={username} required autocapitalize="off">
-		<input placeholder="password" type="password" bind:value={password} required>
-		<input type="submit" value="Login">
-	</form>
-	{#if failed}
-		<p class="error">login failed</p>
-	{/if}
-</Modal>
+<button on:click={() => show = true}>Login</button>
+
+{#if show}
+	<Modal on:close={() => show = false}>
+		<form on:submit|preventDefault={handleLogin}>
+			<!-- svelte-ignore a11y-autofocus -->
+			<input autofocus placeholder="username" type="text" bind:value={username} required autocapitalize="off">
+			<input placeholder="password" type="password" bind:value={password} required>
+			<input type="submit" value="Login">
+		</form>
+		{#if failed}
+			<p class="error">login failed</p>
+		{/if}
+	</Modal>
+{/if}
 
 <style>
 	.error {

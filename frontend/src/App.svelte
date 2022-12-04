@@ -36,6 +36,13 @@
 
 	$: if (!online) logout();
 
+	function useOnlineFallback() {
+		online = navigator.onLine;
+
+		window.addEventListener("offline", () => online = false);
+		window.addEventListener("online", () => online = true);
+	}
+
 	if ("serviceWorker" in navigator) {
 		navigator.serviceWorker.getRegistration().then(registration => {
 			if (registration?.active) {
@@ -43,11 +50,11 @@
 					online = event.data["onlineStatus"]
 				});
 			} else {
-				online = navigator.onLine;
+				useOnlineFallback();
 			}
 		});
 	} else {
-		online = navigator.onLine;
+		useOnlineFallback();
 	}
 
 	$: if (online && "PasswordCredential" in window) {

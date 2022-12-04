@@ -14,6 +14,8 @@ export async function login(username, password) {
 		throw "failed to login";
 	}
 
+	let jwt = await resp.text();
+
 	if ("PasswordCredential" in window) {
 		const cred = new PasswordCredential({
 			id: username,
@@ -22,8 +24,6 @@ export async function login(username, password) {
 
 		await navigator.credentials.store(cred);
 	}
-
-	let jwt = await resp.text();
 
 	setJwt(jwt);
 }
@@ -35,7 +35,19 @@ function setJwt(new_jwt) {
 	const delta_expires = (get(jwt_claims)["exp"] * 1000) - now;
 
 	setTimeout(() => {
-		jwt.set("");
+		logout();
 		console.debug("session expired");
 	}, delta_expires);
+}
+
+function logout() {
+	jwt.set("");
+}
+
+export async function manualLogout() {
+	if ("PasswordCredential" in window) {
+		await navigator.credentials.preventSilentAccess();
+	}
+
+	logout();
 }

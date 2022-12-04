@@ -6,7 +6,7 @@
 	import CreateAccount from "./lib/CreateAccount.svelte";
 	import { fetchUser } from "./lib/users.js";
 	import { jwt, jwt_claims, invite_jwt } from "./lib/stores.js";
-	import { login } from "./lib/login.js";
+	import { login, manualLogout } from "./lib/login.js";
 
 	let showLogin = false;
 
@@ -66,6 +66,7 @@
 				{#if $jwt_claims["user_id"] === 1}
 					<Invite/>
 				{/if}
+				<button on:click={manualLogout}>Logout</button>
 			</div>
 		{/if}
 	</nav>

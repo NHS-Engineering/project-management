@@ -6,7 +6,7 @@
 	import CreateAccount from "./lib/CreateAccount.svelte";
 	import { fetchUser } from "./lib/users.js";
 	import { jwt, jwt_claims, invite_jwt } from "./lib/stores.js";
-	import { login, manualLogout } from "./lib/login.js";
+	import { login, logout, manualLogout } from "./lib/login.js";
 
 	let showLogin = false;
 
@@ -32,7 +32,17 @@
 
 	$: self_user = fetchUser($jwt_claims["user_id"]);
 
-	if ("PasswordCredential" in window) {
+	let online = false;
+
+	$: if (!online) logout();
+
+	if ("serviceWorker" in navigator) {
+		navigator.serviceWorker.addEventListener("message", event => {
+			online = event.data["onlineStatus"]
+		});
+	}
+
+	$: if (online && "PasswordCredential" in window) {
 		navigator.credentials.get({
 			"password": true,
 			"mediation": "optional"
@@ -50,7 +60,11 @@
 	<nav>
 		<h1>Projects List</h1>
 		{#if $jwt === ""}
-			<button on:click={() => showLogin = true}>Login</button>
+			{#if online}
+				<button on:click={() => showLogin = true}>Login</button>
+			{:else}
+				<p>you are currently offline</p>
+			{/if}
 		{:else}
 			<div>
 				{#await self_user}

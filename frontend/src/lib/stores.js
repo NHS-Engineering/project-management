@@ -5,11 +5,11 @@ export const users = writable({});
 export const jwt = writable("");
 export let jwt_claims = writable({});
 jwt.subscribe(jwt => {
-    try {
-        jwt_claims.set(get_jwt_claims(jwt));
-    } catch {
-        console.debug("no valid jwt");
-    }
+	try {
+		jwt_claims.set(get_jwt_claims(jwt));
+	} catch {
+		jwt_claims.set({});
+	}
 });
 
 export const invite_jwt = writable(null);

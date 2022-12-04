@@ -40,7 +40,7 @@ function setJwt(new_jwt) {
 	}, delta_expires);
 }
 
-function logout() {
+export function logout() {
 	jwt.set("");
 }
 

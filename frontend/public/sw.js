@@ -16,8 +16,15 @@ self.addEventListener("fetch", function(event) {
 				cache.add(event.request);
 			});
 		}
+
+		if (response.ok) {
+			sendOnlineStatus(event.clientId, true);
+		}
+
 		return response;
 	}).catch(function() {
+		sendOnlineStatus(event.clientId, false);
+
 		if (event.request.headers.get("Cache-Control") !== "no-cache") {
 			return caches.match(event.request).then(function(response) {
 				return response;
@@ -25,3 +32,12 @@ self.addEventListener("fetch", function(event) {
 		}
 	}));
 });
+
+function sendOnlineStatus(clientId, isOnline) {
+	if (!clientId) return;
+
+	clients.get(clientId).then(client => {
+		if (!client) return;
+		client.postMessage({"onlineStatus": isOnline});
+	});
+}

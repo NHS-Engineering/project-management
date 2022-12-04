@@ -38,11 +38,9 @@
 			"mediation": "optional"
 		}).then(creds => {
 			if (creds !== null) {
-				try {
-					login(creds.id, creds.password);
-				} catch {
+				login(creds.id, creds.password).catch(() => {
 					alert("failed to log you in automatically, manually log in with correct password to fix");
-				}
+				});
 			}
 		});
 	}

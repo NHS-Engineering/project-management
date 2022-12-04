@@ -37,9 +37,17 @@
 	$: if (!online) logout();
 
 	if ("serviceWorker" in navigator) {
-		navigator.serviceWorker.addEventListener("message", event => {
-			online = event.data["onlineStatus"]
+		navigator.serviceWorker.getRegistration().then(registration => {
+			if (registration?.active) {
+				navigator.serviceWorker.addEventListener("message", event => {
+					online = event.data["onlineStatus"]
+				});
+			} else {
+				online = navigator.onLine;
+			}
 		});
+	} else {
+		online = navigator.onLine;
 	}
 
 	$: if (online && "PasswordCredential" in window) {

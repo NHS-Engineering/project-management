@@ -4,7 +4,7 @@ self.addEventListener("install", function(event) {
 	console.log("serviceworker registered");
 
 	caches.open(cache_name).then(function(cache) {
-		return cache.addAll(["/"]); // requires reload to be fully offline, but works mostly well enough
+		return cache.addAll(["/"]); // requires reload to be fully cached, but works mostly well enough
 	});
 });
 

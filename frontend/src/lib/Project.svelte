@@ -142,7 +142,9 @@
 			<p>tasks:</p>
 			<ul>
 				{#each tasks as task}
-					<Task {task} {isOwner} on:deleted={forceRefreshTasks}/>
+					<li>
+						<Task {task} {isOwner} on:deleted={forceRefreshTasks}/>
+					</li>
 				{:else}
 					<p>this project has no tasks</p>
 				{/each}
@@ -168,5 +170,12 @@
 		margin-right: 1em;
 		padding-left: 1em;
 		padding-right: 1em;
+	}
+
+	ul {
+		display: flex;
+		flex-direction: column;
+		max-height: 60vh;
+		overflow-y: auto;
 	}
 </style>

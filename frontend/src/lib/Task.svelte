@@ -38,10 +38,10 @@
 	$: isAssigned = $jwt_claims["user_id"] === task.assignee_id;
 </script>
 
-<li>
+<div>
 	{task.name}
 	<input type="checkbox" bind:checked={task.done} on:input={setDone} disabled={!isAssigned}>
 	{#if isOwner}
 		<button on:click={deleteTask}>Delete Task</button>
 	{/if}
-</li>
+</div>

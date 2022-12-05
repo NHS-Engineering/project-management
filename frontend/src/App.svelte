@@ -148,5 +148,6 @@
 		width: 100%;
 		text-align: center;
 		font-size: .8em;
+		background-color: black;
 	}
 </style>

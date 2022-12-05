@@ -59,3 +59,18 @@ export async function manualLogout() {
 
 	logout();
 }
+
+export function tryAutoLogin(silent) {
+	if ("PasswordCredential" in window) {
+		navigator.credentials.get({
+			"password": true,
+			"mediation": silent ? "silent" : "optional"
+		}).then(creds => {
+			if (creds !== null) {
+				login(creds.id, creds.password).catch(() => {
+					alert("failed to log you in automatically, manually log in with correct password to fix");
+				});
+			}
+		});
+	}
+}

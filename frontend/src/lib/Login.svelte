@@ -1,7 +1,6 @@
 <script>
 	import Modal from "./Modal.svelte";
-	import { createEventDispatcher } from "svelte";
-	import { login } from "./login.js";
+	import { login, tryAutoLogin } from "./login.js";
 
 	let show = false;
 
@@ -17,6 +16,8 @@
 			failed = true;
 		}
 	}
+
+	$: if (show) tryAutoLogin(false);
 </script>
 
 <button on:click={() => show = true}>Login</button>

@@ -6,7 +6,7 @@
 	import CreateAccount from "./lib/CreateAccount.svelte";
 	import { fetchUser } from "./lib/users.js";
 	import { jwt, jwt_claims, invite_jwt } from "./lib/stores.js";
-	import { login, logout, manualLogout } from "./lib/login.js";
+	import { logout, manualLogout, tryAutoLogin } from "./lib/login.js";
 
 	async function getProjects(no_cache) {
 		let projects = await fetch("/api/projects/list", no_cache ? {
@@ -32,7 +32,7 @@
 
 	let online = false;
 
-	$: if (!online) logout();
+	$: if (online) tryAutoLogin(true); else logout();
 
 	function useOnlineFallback() {
 		online = navigator.onLine;
@@ -53,19 +53,6 @@
 		});
 	} else {
 		useOnlineFallback();
-	}
-
-	$: if (online && "PasswordCredential" in window) {
-		navigator.credentials.get({
-			"password": true,
-			"mediation": "optional"
-		}).then(creds => {
-			if (creds !== null) {
-				login(creds.id, creds.password).catch(() => {
-					alert("failed to log you in automatically, manually log in with correct password to fix");
-				});
-			}
-		});
 	}
 </script>
 

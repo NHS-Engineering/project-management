@@ -6,19 +6,19 @@ export async function fetchUser(id) {
 		return null;
 	}
 
-	let maybe_cached = get(users)[id];
-	if (maybe_cached !== undefined) {
-		return maybe_cached;
+	let cached = get(users)[id];
+	if (cached !== undefined) {
+		return cached;
+	} else {
+		users.update(users => {
+			users[id] = fetch(`/api/users/info/${id}`)
+				.then(resp => resp.json());
+			return users;
+		});
 	}
 
 	try {
-		let user = await fetch(`/api/users/info/${id}`);
-		user = await user.json();
-		users.update(users => {
-			users[id] = user;
-			return users;
-		});
-		return user;
+		return get(users)[id];
 	} catch {
 		return null;
 	}

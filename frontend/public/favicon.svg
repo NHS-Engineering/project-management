@@ -1,0 +1,12 @@
+<svg width="512" height="512" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
+ <!-- Created with SVG-edit - https://github.com/SVG-Edit/svgedit-->
+ <title>NHS Engineering Logo</title>
+
+ <g class="layer">
+  <title>Layer 1</title>
+  <rect fill="#003f7f" height="512" id="svg_7" stroke="#000000" width="512" x="0" y="0"/>
+  <text fill="#b2b218" font-family="Serif" font-size="187" id="svg_2" stroke="#000000" stroke-width="0" text-anchor="middle" x="256" xml:space="preserve" y="146">NHSE</text>
+  <text fill="#b2b218" font-family="Serif" font-size="170" id="svg_3" stroke="#000000" stroke-width="0" text-anchor="middle" transform="matrix(1, 0, 0, 1, 0, 0)" x="256" xml:space="preserve" y="334">project</text>
+  <text fill="#b2b218" font-family="Serif" font-size="90" id="svg_6" stroke="#000000" stroke-width="0" text-anchor="middle" x="256" xml:space="preserve" y="478">management</text>
+ </g>
+</svg>

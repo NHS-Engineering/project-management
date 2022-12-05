@@ -160,6 +160,7 @@
 				<button on:click={deleteProject}>Delete Project</button>
 			{:else}
 				<p>you are not the owner of this project so you can't manage it</p>
+				<p>assinging tasks to users other than the owner is coming very soon...</p>
 			{/if}
 		{/if}
 	</Modal>

@@ -75,7 +75,7 @@
 					<p>Logged in as ???</p>
 				{/await}
 
-				{#if $jwt_claims["user_id"] === 1}
+				{#if $jwt_claims["is_admin"] === true}
 					<Invite/>
 				{/if}
 				<button on:click={manualLogout}>Logout</button>

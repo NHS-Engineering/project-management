@@ -49,7 +49,8 @@ macro_rules! impl_jwt {
 #[derive(Serialize, Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct JWTAuth {
-	pub user_id: i32
+	pub user_id: i32,
+	pub is_admin: bool
 }
 
 impl_jwt!(JWTAuth, user_key);

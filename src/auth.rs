@@ -41,13 +41,13 @@ pub fn signup() -> (Status, &'static str) {
 #[rocket::post("/login", data = "<user_info>")]
 pub fn login(user_info: Json<UserInfo<'_>>, keyring: &rocket::State<JWTKeys>) -> (Status, String) {
 	use sha3::{Sha3_512, Digest};
-	use crate::schema::users::dsl::*;
+	use crate::schema::users::dsl;
 
 	let provided_hashed_password = format!("{:x}", Sha3_512::digest(user_info.password));
 	let provided_bytes = provided_hashed_password.as_bytes();
 
 	let mut conn = get_conn();
-	let (user_hashed_password, user_id): (String, i32) = users.select((hashed_password, id)).filter(username.eq(user_info.username)).first(&mut conn).unwrap();
+	let (user_hashed_password, user_id, is_admin): (String, i32, bool) = dsl::users.select((dsl::hashed_password, dsl::id, dsl::is_admin)).filter(dsl::username.eq(user_info.username)).first(&mut conn).unwrap();
 	let retrieved_bytes = user_hashed_password.as_bytes();
 
 	let password_correct = constant_time_eq::constant_time_eq(provided_bytes, retrieved_bytes);
@@ -55,7 +55,8 @@ pub fn login(user_info: Json<UserInfo<'_>>, keyring: &rocket::State<JWTKeys>) ->
 	match password_correct {
 		true => {
 			let user_auth = JWTAuth {
-				user_id
+				user_id,
+				is_admin
 			};
 			let claims = Claims::with_custom_claims(user_auth, Duration::from_mins(5));
 			(Status::Ok, keyring.user_key.authenticate(claims).unwrap())
@@ -70,8 +71,7 @@ pub fn invite(jwt: JWTAuth, username: String, keyring: &rocket::State<JWTKeys>) 
 	use fast_qr::qr::QRBuilder;
 	use fast_qr::convert::svg::SvgBuilder;
 
-	// TODO: check admin field
-	if jwt.user_id != 1 {
+	if !jwt.is_admin {
 		return (Status::Forbidden, (ContentType::Plain, String::from("you are not permitted to invite users")));
 	}
 

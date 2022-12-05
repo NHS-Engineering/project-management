@@ -5,7 +5,8 @@ use rocket::serde::Serialize;
 pub struct User {
 	pub id: i32,
 	pub username: String,
-	pub hashed_password: String
+	pub hashed_password: String,
+	pub is_admin: bool
 }
 
 #[derive(Insertable)]

@@ -24,6 +24,7 @@ diesel::table! {
         id -> Integer,
         username -> Text,
         hashed_password -> Text,
+        is_admin -> Bool,
     }
 }
 

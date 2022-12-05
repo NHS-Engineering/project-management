@@ -124,7 +124,9 @@
 	{#await user}
 		<p>fetching info...</p>
 	{:then user}
-		<p>created by: {user.username}</p>
+		<p>created by:
+			<span style={user.is_admin ? "font-style: italic" : null}>{user.username}</span>
+		</p>
 	{:catch}
 		<p>ERROR: created by user with id {project.owner_id}</p>
 	{/await}

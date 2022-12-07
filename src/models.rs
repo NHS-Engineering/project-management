@@ -1,7 +1,7 @@
 use diesel::prelude::*;
 use rocket::serde::Serialize;
 
-#[derive(Queryable, Debug)]
+#[derive(Queryable)]
 pub struct User {
 	pub id: i32,
 	pub username: String,

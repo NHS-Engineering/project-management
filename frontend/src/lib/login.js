@@ -35,7 +35,6 @@ function setJwt(new_jwt) {
 	const delta_expires = (jwt_claims["exp"] * 1000) - now;
 
 	const delta_at = (jwt_claims["iat"] * 1000) - now;
-	console.log(delta_at);
 	if (Math.abs(delta_at) > 10 * 1000) {
 		alert("your computer's clock is wrong, you may experience problems with this site");
 	}

@@ -14,6 +14,12 @@
 	let modal_visible = false;
 
 	async function deleteProject() {
+		if ((await tasks).length >= 1) {
+			if (!confirm("are you sure you want to delete this project?")) {
+				return;
+			}
+		}
+
 		let resp = await fetch(`/api/projects/delete/${project.id}`, {
 			"method": "DELETE",
 			"headers": {

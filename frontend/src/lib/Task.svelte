@@ -45,7 +45,8 @@
 
 <div>
 	<input type="checkbox" id={task.id} bind:checked={task.done} on:input={setDone} disabled={!isAssigned}>
-	<label for={task.id} on:click={() => show_details = true}>{task.name}</label>
+	<label for={task.id}>{task.name}</label>
+	<button on:click={() => show_details = true}>details</button>
 	{#if isOwner}
 		<button class="dangerous" on:click={deleteTask}>X</button>
 	{/if}
@@ -62,6 +63,8 @@
 		{:catch}
 			<p>ERROR: assigned to user with id {task.assignee_id}</p>
 		{/await}
+
+		<p>assinging tasks to users is coming very soon...</p>
 	</Modal>
 {/if}
 

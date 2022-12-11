@@ -39,9 +39,15 @@
 </script>
 
 <div>
-	{task.name}
-	<input type="checkbox" bind:checked={task.done} on:input={setDone} disabled={!isAssigned}>
+	<input type="checkbox" id={task.id} bind:checked={task.done} on:input={setDone} disabled={!isAssigned}>
+	<label for={task.id}>{task.name}</label>
 	{#if isOwner}
-		<button on:click={deleteTask}>Delete Task</button>
+		<button class="dangerous" on:click={deleteTask}>X</button>
 	{/if}
 </div>
+
+<style>
+	.dangerous {
+		color: red;
+	}
+</style>

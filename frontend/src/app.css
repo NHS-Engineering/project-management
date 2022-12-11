@@ -6,3 +6,12 @@ body {
 a {
 	color: #00a7f5;
 }
+
+button.dangerous {
+	transition-duration: 400ms;
+}
+
+button.dangerous:hover {
+	color: white;
+	background-color: red;
+}

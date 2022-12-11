@@ -142,22 +142,20 @@
 			<p>fetching tasks...</p>
 		{:then tasks}
 			<p>tasks:</p>
-			<ul>
+			<div class="list">
 				{#each tasks as task}
-					<li>
-						<Task {task} {isOwner} on:deleted={forceRefreshTasks}/>
-					</li>
+					<Task {task} {isOwner} on:deleted={forceRefreshTasks}/>
 				{:else}
 					<p>this project has no tasks</p>
 				{/each}
-			</ul>
+			</div>
 		{:catch}
 			<p>failed to fetch tasks</p>
 		{/await}
 		{#if $jwt !== ""}
 			{#if isOwner}
 				<button on:click={newTask}>New Task</button>
-				<button on:click={deleteProject}>Delete Project</button>
+				<button class="dangerous" on:click={deleteProject}>Delete Project</button>
 			{:else}
 				<p>you are not the owner of this project so you can't manage it</p>
 				<p>assinging tasks to users other than the owner is coming very soon...</p>
@@ -175,10 +173,11 @@
 		padding-right: 1em;
 	}
 
-	ul {
+	.list {
 		display: flex;
 		flex-direction: column;
 		max-height: 60vh;
 		overflow-y: auto;
+		margin-bottom: 1em;
 	}
 </style>

@@ -1,6 +1,9 @@
 <script>
 	import { createEventDispatcher } from "svelte";
+	import { fetchUser } from "./users.js";
 	import { jwt, jwt_claims } from "./stores.js";
+	import Modal from "./Modal.svelte";
+
 	export let task;
 	export let isOwner;
 
@@ -36,15 +39,31 @@
 	}
 
 	$: isAssigned = $jwt_claims["user_id"] === task.assignee_id;
+
+	let show_details = false;
 </script>
 
 <div>
 	<input type="checkbox" id={task.id} bind:checked={task.done} on:input={setDone} disabled={!isAssigned}>
-	<label for={task.id}>{task.name}</label>
+	<label for={task.id} on:click={() => show_details = true}>{task.name}</label>
 	{#if isOwner}
 		<button class="dangerous" on:click={deleteTask}>X</button>
 	{/if}
 </div>
+
+{#if show_details}
+	<Modal on:close={() => show_details = false}>
+		{@const assignee = fetchUser(task.assignee_id)}
+		<p>task name: {task.name}</p>
+		{#await assignee}
+			<p>fetching info...</p>
+		{:then user}
+			<p>assigned to: {user.username}</p>
+		{:catch}
+			<p>ERROR: assigned to user with id {task.assignee_id}</p>
+		{/await}
+	</Modal>
+{/if}
 
 <style>
 	.dangerous {

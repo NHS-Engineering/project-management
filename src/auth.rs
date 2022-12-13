@@ -5,6 +5,30 @@ use engineering_web_portal::{get_conn, get_url};
 use rocket::http::{Status, ContentType};
 use crate::jwt::{JWTKeys, JWTAuth, JWTNewAccount};
 
+fn validate_password(password: &str) -> Option<&'static str> {
+	if password.len() < 8 {
+		return Some("password must be least 8 characters");
+	}
+
+	if !password.chars().any(|c| c.is_ascii_lowercase()) {
+		return Some("password must contain at least one lowercase character");
+	}
+
+	if !password.chars().any(|c| c.is_ascii_uppercase()) {
+		return Some("password must contain at least one uppercase character");
+	}
+
+	if !password.chars().any(|c| c.is_ascii_digit()) {
+		return Some("password must contain at least one numeric character");
+	}
+
+	if password.to_lowercase().contains("lion") {
+		return Some("password must NOT contain the word \"lion\"")
+	}
+
+	None
+}
+
 #[derive(Deserialize)]
 #[serde(crate = "rocket::serde")]
 pub struct UserInfo<'a> {
@@ -14,10 +38,15 @@ pub struct UserInfo<'a> {
 
 #[cfg(feature = "debug")]
 #[rocket::post("/signup", data = "<user_info>")]
-pub fn signup(user_info: Json<UserInfo<'_>>) {
+pub fn signup(user_info: Json<UserInfo<'_>>) -> (Status, &'static str) {
 	use crate::models::NewUser;
 	use sha3::{Sha3_512, Digest};
 	use crate::schema::users;
+
+	match validate_password(user_info.password) {
+		Some(reason) => return (Status::BadRequest, reason),
+		None => ()
+	};
 
 	// yes I know, and the answer is "not in my threat model"
 	let hashed_password = format!("{:x}", Sha3_512::digest(user_info.password));
@@ -30,6 +59,8 @@ pub fn signup(user_info: Json<UserInfo<'_>>) {
 	diesel::insert_into(users::table)
 		.values(&new_user)
 		.execute(&mut conn).unwrap();
+
+	(Status::Ok, "account created")
 }
 
 #[cfg(not(feature = "debug"))]
@@ -38,8 +69,15 @@ pub fn signup() -> (Status, &'static str) {
 	(Status::ImATeapot, "signup is only enabled in debug mode, try the invite system instead")
 }
 
+#[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
+pub struct AuthResponse {
+	jwt: String,
+	weak_hint: Option<&'static str>
+}
+
 #[rocket::post("/login", data = "<user_info>")]
-pub fn login(user_info: Json<UserInfo<'_>>, keyring: &rocket::State<JWTKeys>) -> (Status, String) {
+pub fn login(user_info: Json<UserInfo<'_>>, keyring: &rocket::State<JWTKeys>) -> (Status, Option<Json<AuthResponse>>) {
 	use sha3::{Sha3_512, Digest};
 	use crate::schema::users::dsl;
 
@@ -54,14 +92,23 @@ pub fn login(user_info: Json<UserInfo<'_>>, keyring: &rocket::State<JWTKeys>) ->
 
 	match password_correct {
 		true => {
+			let weak_hint = match cfg!(feature = "debug") && is_admin {
+				false => validate_password(user_info.password),
+				true => None
+			};
+
 			let user_auth = JWTAuth {
 				user_id,
 				is_admin
 			};
 			let claims = Claims::with_custom_claims(user_auth, Duration::from_mins(5));
-			(Status::Ok, keyring.user_key.authenticate(claims).unwrap())
+
+			(Status::Ok, Some(Json(AuthResponse {
+				jwt: keyring.user_key.authenticate(claims).unwrap(),
+				weak_hint
+			})))
 		},
-		false => (Status::Forbidden, String::from("incorrect password"))
+		false => (Status::Forbidden, None)
 	}
 }
 
@@ -97,10 +144,15 @@ pub fn invite(jwt: JWTAuth, username: String, keyring: &rocket::State<JWTKeys>) 
 }
 
 #[rocket::post("/redeem_invite", data = "<password>")]
-pub fn redeem_invite(jwt: JWTNewAccount, password: String) {
+pub fn redeem_invite(jwt: JWTNewAccount, password: String) -> (Status, &'static str) {
 	use crate::models::NewUser;
 	use sha3::{Sha3_512, Digest};
 	use crate::schema::users;
+
+	match validate_password(&password) {
+		Some(reason) => return (Status::BadRequest, reason),
+		None => ()
+	};
 
 	// yes I'm aware, but probably not that big of a deal tbh
 	let hashed_password = format!("{:x}", Sha3_512::digest(password));
@@ -115,4 +167,6 @@ pub fn redeem_invite(jwt: JWTNewAccount, password: String) {
 	diesel::insert_into(users::table)
 		.values(&new_user)
 		.execute(&mut conn).unwrap();
+
+	(Status::Ok, "account created")
 }

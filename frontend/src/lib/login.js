@@ -14,7 +14,11 @@ export async function login(username, password) {
 		throw "failed to login";
 	}
 
-	let jwt = await resp.text();
+	resp = await resp.json();
+	if (resp["weak_hint"] !== null) {
+		alert("WARNING: you password does not meet strength requirements, change it ASAP\n" + resp["weak_hint"])
+	}
+	let jwt = resp["jwt"];
 
 	if ("PasswordCredential" in window) {
 		const cred = new PasswordCredential({

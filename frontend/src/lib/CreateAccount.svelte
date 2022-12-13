@@ -24,7 +24,12 @@
 		});
 
 		if (!resp.ok) {
-			alert("failed to redeem invite (maybe it's expired idk)");
+			if (resp.status === 400) {
+				alert("ERROR: password does not meet requirements:\n" + await resp.text())
+			} else {
+				alert("failed to redeem invite (maybe it's expired idk)");
+			}
+
 			return;
 		}
 

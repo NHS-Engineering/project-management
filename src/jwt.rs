@@ -36,7 +36,7 @@ macro_rules! impl_jwt {
 
 						match key.verify_token::<Self>(&jwt_header, None).ok().map(|claims| claims.custom) {
 							Some(claims) => Outcome::Success(claims),
-							None => Outcome::Failure((Status::BadRequest, JWTError::BadJWT))
+							None => Outcome::Failure((Status::Unauthorized, JWTError::BadJWT))
 						}
 					},
 					None => Outcome::Failure((Status::Unauthorized, JWTError::NoJWT))

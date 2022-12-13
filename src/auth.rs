@@ -5,28 +5,43 @@ use engineering_web_portal::{get_conn, get_url};
 use rocket::http::{Status, ContentType};
 use crate::jwt::{JWTKeys, JWTAuth, JWTNewAccount};
 
-fn validate_password(password: &str) -> Option<&'static str> {
-	if password.len() < 8 {
-		return Some("password must be least 8 characters");
-	}
+const BANNED_WORDS: [&'static str; 5] = ["lion", "engineering", "engineer", "nhs", "nhsd"];
 
-	if !password.chars().any(|c| c.is_ascii_lowercase()) {
-		return Some("password must contain at least one lowercase character");
-	}
+#[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
+pub enum PasswordValidity {
+	BasicRequirement(&'static str),
+	BannedWord(&'static str),
+	Valid
+}
 
-	if !password.chars().any(|c| c.is_ascii_uppercase()) {
-		return Some("password must contain at least one uppercase character");
-	}
+impl PasswordValidity {
+	fn check(password: &str) -> Self {
+		if password.len() < 8 {
+			return Self::BasicRequirement("password must be least 8 characters");
+		}
 
-	if !password.chars().any(|c| c.is_ascii_digit()) {
-		return Some("password must contain at least one numeric character");
-	}
+		if !password.chars().any(|c| c.is_ascii_lowercase()) {
+			return Self::BasicRequirement("password must contain at least one lowercase character");
+		}
 
-	if password.to_lowercase().contains("lion") {
-		return Some("password must NOT contain the word \"lion\"")
-	}
+		if !password.chars().any(|c| c.is_ascii_uppercase()) {
+			return Self::BasicRequirement("password must contain at least one uppercase character");
+		}
 
-	None
+		if !password.chars().any(|c| c.is_ascii_digit()) {
+			return Self::BasicRequirement("password must contain at least one numeric character");
+		}
+
+		let lower = password.to_lowercase();
+		for banned_word in BANNED_WORDS {
+			if lower.contains(banned_word) {
+				return Self::BannedWord(banned_word)
+			}
+		}
+
+		Self::Valid
+	}
 }
 
 #[derive(Deserialize)]
@@ -38,14 +53,14 @@ pub struct UserInfo<'a> {
 
 #[cfg(feature = "debug")]
 #[rocket::post("/signup", data = "<user_info>")]
-pub fn signup(user_info: Json<UserInfo<'_>>) -> (Status, &'static str) {
+pub fn signup(user_info: Json<UserInfo<'_>>) -> (Status, Json<PasswordValidity>) {
 	use crate::models::NewUser;
 	use sha3::{Sha3_512, Digest};
 	use crate::schema::users;
 
-	match validate_password(user_info.password) {
-		Some(reason) => return (Status::BadRequest, reason),
-		None => ()
+	match PasswordValidity::check(user_info.password) {
+		PasswordValidity::Valid => (),
+		problemo => return (Status::BadRequest, Json(problemo))
 	};
 
 	// yes I know, and the answer is "not in my threat model"
@@ -60,7 +75,7 @@ pub fn signup(user_info: Json<UserInfo<'_>>) -> (Status, &'static str) {
 		.values(&new_user)
 		.execute(&mut conn).unwrap();
 
-	(Status::Ok, "account created")
+	(Status::Ok, Json(PasswordValidity::Valid))
 }
 
 #[cfg(not(feature = "debug"))]
@@ -73,7 +88,7 @@ pub fn signup() -> (Status, &'static str) {
 #[serde(crate = "rocket::serde")]
 pub struct AuthResponse {
 	jwt: String,
-	weak_hint: Option<&'static str>
+	weak_hint: PasswordValidity
 }
 
 #[rocket::post("/login", data = "<user_info>")]
@@ -93,8 +108,8 @@ pub fn login(user_info: Json<UserInfo<'_>>, keyring: &rocket::State<JWTKeys>) ->
 	match password_correct {
 		true => {
 			let weak_hint = match cfg!(feature = "debug") && is_admin {
-				false => validate_password(user_info.password),
-				true => None
+				false => PasswordValidity::check(user_info.password),
+				true => PasswordValidity::Valid
 			};
 
 			let user_auth = JWTAuth {
@@ -144,14 +159,14 @@ pub fn invite(jwt: JWTAuth, username: String, keyring: &rocket::State<JWTKeys>) 
 }
 
 #[rocket::post("/redeem_invite", data = "<password>")]
-pub fn redeem_invite(jwt: JWTNewAccount, password: String) -> (Status, &'static str) {
+pub fn redeem_invite(jwt: JWTNewAccount, password: String) -> (Status, Json<PasswordValidity>) {
 	use crate::models::NewUser;
 	use sha3::{Sha3_512, Digest};
 	use crate::schema::users;
 
-	match validate_password(&password) {
-		Some(reason) => return (Status::BadRequest, reason),
-		None => ()
+	match PasswordValidity::check(&password) {
+		PasswordValidity::Valid => (),
+		problem => return (Status::BadRequest, Json(problem))
 	};
 
 	// yes I'm aware, but probably not that big of a deal tbh
@@ -168,5 +183,5 @@ pub fn redeem_invite(jwt: JWTNewAccount, password: String) -> (Status, &'static 
 		.values(&new_user)
 		.execute(&mut conn).unwrap();
 
-	(Status::Ok, "account created")
+	(Status::Ok, Json(PasswordValidity::Valid))
 }

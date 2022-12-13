@@ -15,8 +15,9 @@ export async function login(username, password) {
 	}
 
 	resp = await resp.json();
-	if (resp["weak_hint"] !== null) {
-		alert("WARNING: you password does not meet strength requirements, change it ASAP\n" + resp["weak_hint"])
+	if (resp["weak_hint"] !== "Valid") {
+		const reason = password_reason(resp["weak_hint"]);
+		alert("WARNING: you password does not meet strength requirements, change it ASAP\n" + reason);
 	}
 	let jwt = resp["jwt"];
 
@@ -76,4 +77,22 @@ export function tryAutoLogin(silent) {
 			}
 		});
 	}
+}
+
+export function password_reason(reason) {
+	if (reason === "Valid") {
+		return "looks pretty valid to me...";
+	}
+
+	if ("BasicRequirement" in reason) {
+		return reason["BasicRequirement"]
+	}
+
+	if ("BannedWord" in reason) {
+		return `your password contains a banned word: "${reason["BannedWord"]}"`
+	}
+
+	alert("unknown invalid password reason");
+	console.log(reason);
+	return null;
 }

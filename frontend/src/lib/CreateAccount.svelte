@@ -1,6 +1,6 @@
 <script>
 	import Modal from "./Modal.svelte";
-	import { login } from "./login.js";
+	import { login, password_reason } from "./login.js";
 	import { invite_jwt } from "./stores.js";
 	import { get_jwt_claims } from "./jwt.js";
 
@@ -25,7 +25,8 @@
 
 		if (!resp.ok) {
 			if (resp.status === 400) {
-				alert("ERROR: password does not meet requirements:\n" + await resp.text())
+				const reason = password_reason(await resp.json());
+				alert("ERROR: password does not meet requirements:\n" + reason);
 			} else {
 				alert("failed to redeem invite (maybe it's expired idk)");
 			}

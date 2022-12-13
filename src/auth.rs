@@ -84,6 +84,19 @@ pub fn signup() -> (Status, &'static str) {
 	(Status::ImATeapot, "signup is only enabled in debug mode, try the invite system instead")
 }
 
+fn password_correct(conn: &mut SqliteConnection, user_id: i32, password: &str) -> bool {
+	use sha3::{Sha3_512, Digest};
+	use crate::schema::users::dsl;
+
+	let provided_hashed_password = format!("{:x}", Sha3_512::digest(password));
+	let provided_bytes = provided_hashed_password.as_bytes();
+
+	let retrieved_hashed_password: String = dsl::users.find(user_id).select(dsl::hashed_password).first(conn).unwrap();
+	let retrieved_bytes = retrieved_hashed_password.as_bytes();
+
+	constant_time_eq::constant_time_eq(provided_bytes, retrieved_bytes)
+}
+
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]
 pub struct AuthResponse {
@@ -93,19 +106,12 @@ pub struct AuthResponse {
 
 #[rocket::post("/login", data = "<user_info>")]
 pub fn login(user_info: Json<UserInfo<'_>>, keyring: &rocket::State<JWTKeys>) -> (Status, Option<Json<AuthResponse>>) {
-	use sha3::{Sha3_512, Digest};
 	use crate::schema::users::dsl;
 
-	let provided_hashed_password = format!("{:x}", Sha3_512::digest(user_info.password));
-	let provided_bytes = provided_hashed_password.as_bytes();
-
 	let mut conn = get_conn();
-	let (user_hashed_password, user_id, is_admin): (String, i32, bool) = dsl::users.select((dsl::hashed_password, dsl::id, dsl::is_admin)).filter(dsl::username.eq(user_info.username)).first(&mut conn).unwrap();
-	let retrieved_bytes = user_hashed_password.as_bytes();
+	let (user_id, is_admin): (i32, bool) = dsl::users.select((dsl::id, dsl::is_admin)).filter(dsl::username.eq(user_info.username)).first(&mut conn).unwrap();
 
-	let password_correct = constant_time_eq::constant_time_eq(provided_bytes, retrieved_bytes);
-
-	match password_correct {
+	match password_correct(&mut conn, user_id, &user_info.password) {
 		true => {
 			let weak_hint = match cfg!(feature = "debug") && is_admin {
 				false => PasswordValidity::check(user_info.password),
@@ -184,4 +190,45 @@ pub fn redeem_invite(jwt: JWTNewAccount, password: String) -> (Status, Json<Pass
 		.execute(&mut conn).unwrap();
 
 	(Status::Ok, Json(PasswordValidity::Valid))
+}
+
+#[derive(Deserialize)]
+#[serde(crate = "rocket::serde")]
+pub struct PasswordChangeInfo<'a> {
+	old_password: &'a str,
+	new_password: &'a str
+}
+
+#[derive(Serialize)]
+#[serde(crate = "rocket::serde")]
+pub enum PasswordChangeResult {
+	Success,
+	PasswordIncorrect,
+	InvalidPassword(PasswordValidity)
+}
+
+#[rocket::post("/change_password", data = "<change_info>")]
+pub fn change_password(jwt: JWTAuth, change_info: Json<PasswordChangeInfo<'_>>) -> (Status, Json<PasswordChangeResult>) {
+	use sha3::{Sha3_512, Digest};
+	use crate::schema::users::dsl;
+
+	let mut conn = get_conn();
+
+	match password_correct(&mut conn, jwt.user_id, change_info.old_password) {
+		true => {
+			match PasswordValidity::check(change_info.new_password) {
+				PasswordValidity::Valid => {
+					let new_hashed = format!("{:x}", Sha3_512::digest(change_info.new_password));
+
+					diesel::update(dsl::users.find(jwt.user_id))
+						.set(dsl::hashed_password.eq(new_hashed))
+						.execute(&mut conn).unwrap();
+
+					(Status::Ok, Json(PasswordChangeResult::Success))
+				},
+				problem => (Status::BadRequest, Json(PasswordChangeResult::InvalidPassword(problem)))
+			}
+		},
+		false => (Status::Forbidden, Json(PasswordChangeResult::PasswordIncorrect))
+	}
 }

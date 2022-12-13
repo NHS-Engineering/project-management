@@ -4,6 +4,7 @@
 	import Project from "./lib/Project.svelte";
 	import Invite from "./lib/Invite.svelte";
 	import CreateAccount from "./lib/CreateAccount.svelte";
+	import ChangePassword from "./lib/ChangePassword.svelte";
 	import { fetchUser } from "./lib/users.js";
 	import { jwt, jwt_claims, invite_jwt } from "./lib/stores.js";
 	import { logout, manualLogout, tryAutoLogin } from "./lib/login.js";
@@ -78,6 +79,7 @@
 				{#if $jwt_claims["is_admin"] === true}
 					<Invite/>
 				{/if}
+				<ChangePassword/>
 				<button on:click={manualLogout}>Logout</button>
 			</div>
 		{/if}

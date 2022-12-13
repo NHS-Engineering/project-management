@@ -17,7 +17,7 @@ fn rocket() -> _ {
 	rocket::build()
 		.manage(jwt::JWTKeys::generate())
 		.mount("/api/users", rocket::routes![users::info])
-		.mount("/api/auth", rocket::routes![auth::signup, auth::login, auth::invite, auth::redeem_invite])
+		.mount("/api/auth", rocket::routes![auth::signup, auth::login, auth::invite, auth::redeem_invite, auth::change_password])
 		.mount("/api/projects", rocket::routes![projects::new, projects::list, projects::delete, projects::set_color])
 		.mount("/api/tasks", rocket::routes![tasks::new, tasks::list, tasks::delete, tasks::set_done])
 		.mount("/", rocket::fs::FileServer::from(match std::env::var("OVERRIDE_STATIC") {

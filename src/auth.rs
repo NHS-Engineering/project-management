@@ -148,7 +148,7 @@ pub fn invite(jwt: JWTAuth, username: String, keyring: &rocket::State<JWTKeys>) 
 	let invitation = JWTNewAccount {
 		username
 	};
-	let claims = Claims::with_custom_claims(invitation, Duration::from_mins(2));
+	let claims = Claims::with_custom_claims(invitation, Duration::from_mins(5));
 	let new_jwt = key.authenticate(claims).unwrap();
 
 	let mut invite_url = get_url();

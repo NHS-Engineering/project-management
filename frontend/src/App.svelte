@@ -79,7 +79,7 @@
 				{#if $jwt_claims["is_admin"] === true}
 					<Invite/>
 				{/if}
-				<ChangePassword/>
+				<ChangePassword {self_user}/>
 				<button on:click={manualLogout}>Logout</button>
 			</div>
 		{/if}

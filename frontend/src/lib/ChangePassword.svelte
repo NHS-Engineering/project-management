@@ -2,6 +2,8 @@
 	import Modal from "./Modal.svelte";
 	import { jwt } from "./stores.js";
 
+	export let self_user;
+
 	let show_modal = false;
 
 	let old_password = "";
@@ -26,6 +28,15 @@
 		});
 
 		if (resp.ok) {
+			if ("PasswordCredential" in window) {
+				const cred = new PasswordCredential({
+					id: (await self_user).username,
+					password: new_password
+				});
+
+				await navigator.credentials.store(cred);
+			}
+
 			alert("successfully changed password");
 			show_modal = false;
 		} else {

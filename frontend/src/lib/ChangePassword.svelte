@@ -42,7 +42,7 @@
 			<input placeholder="old password" type="password" bind:value={old_password} required>
 			<input placeholder="new password" type="password" bind:value={new_password} required>
 			<input placeholder="confirm new password" type="password" bind:value={new_password_confirm} required>
-			<input type="submit" value="Change Password">
+			<input type="submit" value="Change Password" class="dangerous">
 		</form>
 	</Modal>
 {/if}

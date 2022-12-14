@@ -7,11 +7,11 @@ a {
 	color: #00a7f5;
 }
 
-button.dangerous {
+.dangerous {
 	transition-duration: 400ms;
 }
 
-button.dangerous:hover {
-	color: white;
+.dangerous:hover {
+	color: white !important;
 	background-color: red;
 }

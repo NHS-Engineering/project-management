@@ -56,6 +56,7 @@ function setJwt(new_jwt) {
 }
 
 export function logout() {
+	messages.set([]);
 	jwt.set("");
 }
 

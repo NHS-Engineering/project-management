@@ -1,6 +1,7 @@
 <script>
 	import Modal from "./Modal.svelte";
 	import { jwt } from "./stores.js";
+	import { password_reason } from "./login.js";
 
 	export let self_user;
 
@@ -40,7 +41,15 @@
 			alert("successfully changed password");
 			show_modal = false;
 		} else {
-			alert("failed to change password"); // TODO: reason
+			const reason = await resp.json();
+
+			if (reason === "PasswordIncorrect") {
+				alert("your old password is incorrect")
+			} else if ("InvalidPassword" in reason) {
+				alert(password_reason(reason["InvalidPassword"]))
+			} else {
+				alert("something went wrong??");
+			}
 		}
 	}
 </script>

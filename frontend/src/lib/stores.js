@@ -13,3 +13,5 @@ jwt.subscribe(jwt => {
 });
 
 export const invite_jwt = writable(null);
+
+export const messages = writable([]);

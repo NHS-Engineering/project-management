@@ -1,4 +1,4 @@
-import { jwt } from "./stores.js";
+import { jwt, messages } from "./stores.js";
 import { get_jwt_claims } from "./jwt.js";
 
 export async function login(username, password) {
@@ -17,7 +17,10 @@ export async function login(username, password) {
 	resp = await resp.json();
 	if (resp["weak_hint"] !== "Valid") {
 		const reason = password_reason(resp["weak_hint"]);
-		alert("WARNING: you password does not meet strength requirements, change it ASAP\n" + reason);
+		messages.update(messages => {
+			messages.push("WARNING: password does not meet strength requirements, change it ASAP:\n" + reason);
+			return messages;
+		})
 	}
 	let jwt = resp["jwt"];
 

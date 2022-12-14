@@ -1,6 +1,6 @@
 <script>
 	import Modal from "./Modal.svelte";
-	import { jwt } from "./stores.js";
+	import { jwt, messages } from "./stores.js";
 	import { password_reason } from "./login.js";
 
 	export let self_user;
@@ -39,7 +39,12 @@
 			}
 
 			alert("successfully changed password");
+			messages.set([]); // TODO: this does not scale...
 			show_modal = false;
+
+			old_password = "";
+			new_password = "";
+			new_password_confirm = "";
 		} else {
 			const reason = await resp.json();
 

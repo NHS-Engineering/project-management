@@ -12,6 +12,7 @@
 	networking.firewall = {
 		enable = true;
 		allowedTCPPorts = [ 80 443 ];
+		allowedUDPPorts = [ 443 ];
 	};
 
 	users.mutableUsers = false;
@@ -31,6 +32,8 @@
 	};
 
 	services.nginx = {
+		package = pkgs.nginxQuic;
+
 		enable = true;
 		recommendedProxySettings = true;
 		recommendedTlsSettings = true;
@@ -38,6 +41,7 @@
 		virtualHosts."${domain}" = {
 			enableACME = true;
 			forceSSL = true;
+			http3 = true;
 
 			locations."/" = {
 				proxyPass = "http://127.0.0.1:8000";

@@ -37,6 +37,7 @@
 		enable = true;
 		recommendedProxySettings = true;
 		recommendedTlsSettings = true;
+		recommendedGzipSettings = true;
 
 		virtualHosts."${domain}" = {
 			enableACME = true;

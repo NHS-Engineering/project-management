@@ -17,10 +17,10 @@
 <svelte:window on:keydown={handle_keydown}/>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class="modal-background" on:click={close}></div>
-
-<div class="modal">
-	<slot/>
+<div class="modal-background" on:click={close}>
+	<div class="modal" on:click|stopPropagation>
+		<slot/>
+	</div>
 </div>
 
 <style>
@@ -38,5 +38,6 @@
 		top: 50%;
 		left: 50%;
 		transform: translate(-50%,-50%);
+		min-width: max-content;
 	}
 </style>

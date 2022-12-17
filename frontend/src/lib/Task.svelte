@@ -43,19 +43,12 @@
 	let show_details = false;
 </script>
 
-<div>
+<div class={show_details ? "seperate" : undefined}>
 	<input type="checkbox" id={task.id} bind:checked={task.done} on:input={setDone} disabled={!isAssigned}>
 	<label for={task.id}>{task.name}</label>
-	<button on:click={() => show_details = true}>details</button>
-	{#if isOwner}
-		<button class="dangerous" on:click={deleteTask}>X</button>
-	{/if}
-</div>
 
-{#if show_details}
-	<Modal on:close={() => show_details = false}>
+	{#if show_details}
 		{@const assignee = fetchUser(task.assignee_id)}
-		<p>task name: {task.name}</p>
 		{#await assignee}
 			<p>fetching info...</p>
 		{:then user}
@@ -63,13 +56,30 @@
 		{:catch}
 			<p>ERROR: assigned to user with id {task.assignee_id}</p>
 		{/await}
+		<button on:click={() => show_details = false}>hide details</button>
+	{:else}
+		<button on:click={() => show_details = true}>details</button>
+	{/if}
 
-		<p>assinging tasks to users is coming very soon...</p>
-	</Modal>
-{/if}
+	{#if isOwner}
+		<button class="dangerous" on:click={deleteTask}>X</button>
+	{/if}
+</div>
 
 <style>
 	.dangerous {
 		color: red;
+	}
+
+	.seperate:not(:first-child) {
+		border-top: 1px solid white;
+		padding-top: 0.5em;
+		margin-top: 0.5em;
+	}
+
+	.seperate:not(:last-child) {
+		border-bottom: 1px solid white;
+		padding-bottom: 0.5em;
+		margin-bottom: 0.5em;
 	}
 </style>

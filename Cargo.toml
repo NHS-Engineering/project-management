@@ -36,3 +36,7 @@ features = ["svg"]
 default = ["debug", "rebuild-static"]
 debug = []
 rebuild-static = []
+
+[profile.release]
+lto = "fat"
+codegen-units = 1

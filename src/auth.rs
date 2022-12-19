@@ -53,15 +53,10 @@ pub struct UserInfo<'a> {
 
 #[cfg(feature = "debug")]
 #[rocket::post("/signup", data = "<user_info>")]
-pub fn signup(user_info: Json<UserInfo<'_>>) -> (Status, Json<PasswordValidity>) {
+pub fn signup(user_info: Json<UserInfo<'_>>) -> Json<PasswordValidity> {
 	use crate::models::NewUser;
 	use sha3::{Sha3_512, Digest};
 	use crate::schema::users;
-
-	match PasswordValidity::check(user_info.password) {
-		PasswordValidity::Valid => (),
-		problemo => return (Status::BadRequest, Json(problemo))
-	};
 
 	// yes I know, and the answer is "not in my threat model"
 	let hashed_password = format!("{:x}", Sha3_512::digest(user_info.password));
@@ -75,7 +70,7 @@ pub fn signup(user_info: Json<UserInfo<'_>>) -> (Status, Json<PasswordValidity>)
 		.values(&new_user)
 		.execute(&mut conn).unwrap();
 
-	(Status::Ok, Json(PasswordValidity::Valid))
+	Json(PasswordValidity::check(user_info.password))
 }
 
 #[cfg(not(feature = "debug"))]
@@ -113,10 +108,7 @@ pub fn login(user_info: Json<UserInfo<'_>>, keyring: &rocket::State<JWTKeys>) ->
 
 	match password_correct(&mut conn, user_id, &user_info.password) {
 		true => {
-			let weak_hint = match cfg!(feature = "debug") && is_admin {
-				false => PasswordValidity::check(user_info.password),
-				true => PasswordValidity::Valid
-			};
+			let weak_hint = PasswordValidity::check(user_info.password);
 
 			let user_auth = JWTAuth {
 				user_id,

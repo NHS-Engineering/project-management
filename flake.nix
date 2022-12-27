@@ -14,16 +14,16 @@
 				nix-filter.overlays.default
 			];
 		};
-		in let nightlyRust = (pkgs.rustChannelOf {
-			date = "2022-11-07";
+		nightlyRust = (pkgs.rustChannelOf {
+			date = "2022-12-27";
 			channel = "nightly";
-			sha256 = "sha256-Z51XyBXGzDNX5ioVr4JvBnOsD/+iIW1PVIQCdrn82jg=";
+			sha256 = "sha256-TE8YDfshlO8pSkqttunV2IIBGejXseKfZ7JKLDS337s=";
 		});
-		in let rustPlatform = pkgs.makeRustPlatform {
+		rustPlatform = pkgs.makeRustPlatform {
 			cargo = nightlyRust.rust;
 			rustc = nightlyRust.rust;
 		};
-		in let frontend = pkgs.mkYarnPackage {
+		frontend = pkgs.mkYarnPackage {
 			pname = "frontend";
 			version = "0.0.0";
 
@@ -32,7 +32,7 @@
 			buildPhase = "yarn --offline build";
 			distPhase = "true";
 		};
-		in let backend = rustPlatform.buildRustPackage {
+		backend = rustPlatform.buildRustPackage {
 			pname = "engineering-web-portal";
 			version = "0.1.0";
 			buildInputs = [pkgs.sqlite];
@@ -53,7 +53,7 @@
 
 			cargoLock.lockFile = ./Cargo.lock;
 		};
-		in let fullstack = pkgs.stdenv.mkDerivation {
+		fullstack = pkgs.stdenv.mkDerivation {
 			name = "fullstack";
 			src = frontend;
 

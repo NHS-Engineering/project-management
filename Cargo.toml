@@ -29,7 +29,7 @@ default-features = false
 features = ["sqlite"]
 
 [dependencies.fast_qr]
-version = "0.6"
+version = "0.7"
 features = ["svg"]
 
 [features]

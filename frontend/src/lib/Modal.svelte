@@ -25,11 +25,11 @@
 
 <style>
 	.modal-background {
-		position: absolute;
-		top: -50vh;
-		left: -50vw;
-		height: 150vh;
-		width: 150vw;
+		position: fixed;
+		top: 0;
+		left: 0;
+		height: 100%;
+		width: 100%;
 		background-color: rgba(0, 0, 0, .6);
 	}
 

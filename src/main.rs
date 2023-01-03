@@ -6,6 +6,9 @@ mod auth;
 mod projects;
 mod tasks;
 
+#[cfg(test)]
+mod test;
+
 use engineering_web_portal::{get_conn, run_migrations, copyright_message};
 
 #[rocket::launch]

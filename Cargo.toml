@@ -32,6 +32,10 @@ features = ["sqlite"]
 version = "0.7"
 features = ["svg"]
 
+[dev-dependencies]
+lazy_static = "1.4"
+temp-file = "0.1"
+
 [features]
 default = ["debug", "rebuild-static"]
 debug = []

@@ -27,7 +27,7 @@ impl<'a> std::default::Default for IsolatedClient<'a> {
 		let temp_db_path = temp_db.path();
 		std::env::set_var("OVERRIDE_DB", temp_db_path.as_os_str());
 
-		// makes tests working directory agnostic, don't expect testing files to work correctly...
+		// makes tests working directory agnostic, don't expect testing static files to work correctly...
 		std::env::set_var("OVERRIDE_STATIC", temp_db_path.ancestors().nth(2).unwrap());
 
 		Self {

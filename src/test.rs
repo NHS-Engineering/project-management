@@ -1,6 +1,7 @@
 use super::rocket;
 use rocket::local::blocking::Client;
 use rocket::http::Status;
+use rocket::serde::json::json;
 
 use std::sync::{Mutex, MutexGuard};
 use lazy_static::lazy_static;
@@ -41,6 +42,15 @@ impl<'a> std::default::Default for IsolatedClient<'a> {
 #[test]
 fn tasks() {
 	let instance = IsolatedClient::default();
-	let response = instance.client.get("/api/projects/list").dispatch();
-	assert_eq!(response.status(), Status::Ok);
+	let list_response = instance.client.get("/api/projects/list").dispatch();
+	assert_eq!(list_response.status(), Status::Ok);
+	assert_eq!(list_response.into_json(), Some(json!({
+		"projects": []
+	})));
+
+	const PROJECT_NAME: &'static str = "test project";
+
+	let new_response = instance.client.post("/api/projects/new")
+		.body(PROJECT_NAME).dispatch();
+	assert_eq!(new_response.status(), Status::Unauthorized);
 }

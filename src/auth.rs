@@ -51,7 +51,7 @@ pub struct UserInfo<'a> {
 	password: &'a str
 }
 
-#[cfg(feature = "debug")]
+#[cfg(any(test, feature = "debug"))]
 #[rocket::post("/signup", data = "<user_info>")]
 pub fn signup(user_info: Json<UserInfo<'_>>) -> Json<PasswordValidity> {
 	use crate::models::NewUser;
@@ -73,10 +73,10 @@ pub fn signup(user_info: Json<UserInfo<'_>>) -> Json<PasswordValidity> {
 	Json(PasswordValidity::check(user_info.password))
 }
 
-#[cfg(not(feature = "debug"))]
+#[cfg(not(any(test, feature = "debug")))]
 #[rocket::post("/signup")]
 pub fn signup() -> (Status, &'static str) {
-	(Status::ImATeapot, "signup is only enabled in debug mode, try the invite system instead")
+	(Status::ImATeapot, "signup is only enabled in test/debug mode, try the invite system instead")
 }
 
 fn password_correct(conn: &mut SqliteConnection, user_id: i32, password: &str) -> bool {

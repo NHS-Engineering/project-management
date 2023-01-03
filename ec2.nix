@@ -3,6 +3,7 @@
 	imports = [ (modulesPath + "/virtualisation/amazon-image.nix") ];
 	ec2.hvm = true;
 
+	# for debugging/troubleshooting
 	environment.systemPackages = with pkgs; [
 		vim
 		htop
@@ -62,6 +63,11 @@
 			User = "engineer";
 			ExecStart = "${fullstack}/bin/fullstack";
 		};
+	};
+
+	nix.gc = {
+		automatic = true;
+		dates = "weekly";
 	};
 
 	system.stateVersion = "22.05";

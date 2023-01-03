@@ -24,7 +24,11 @@ impl<'a> std::default::Default for IsolatedClient<'a> {
 	fn default() -> Self {
 		let lock = LOCK.lock().unwrap();
 		let temp_db = TempFile::new().unwrap();
-		std::env::set_var("OVERRIDE_DB", temp_db.path().as_os_str());
+		let temp_db_path = temp_db.path();
+		std::env::set_var("OVERRIDE_DB", temp_db_path.as_os_str());
+
+		// makes tests working directory agnostic, don't expect testing files to work correctly...
+		std::env::set_var("OVERRIDE_STATIC", temp_db_path.ancestors().nth(2).unwrap());
 
 		Self {
 			client: Client::tracked(rocket()).unwrap(),

@@ -39,31 +39,33 @@ impl<'a> std::default::Default for IsolatedClient<'a> {
 	}
 }
 
-const TEST_USERNAME: &'static str = "test_user";
-const TEST_PASSWORD: &'static str = "test_user";
+static TEST_USERNAME: &'static str = "test_user";
+static TEST_PASSWORD: &'static str = "test_password";
 
-fn create_test_account<'a>(client: &Client) -> Header<'a> {
-	let user_info: Value = json!({
-		"username": TEST_USERNAME,
-		"password": TEST_PASSWORD
-	});
+impl<'c> IsolatedClient<'c> {
+	fn create_test_account<'a>(&self) -> Header<'a> {
+		let user_info: Value = json!({
+			"username": TEST_USERNAME,
+			"password": TEST_PASSWORD
+		});
 
-	let signup_response = client.post("/api/auth/signup").json(&user_info).dispatch();
-	assert_eq!(signup_response.status(), Status::Ok);
+		let signup_response = self.client.post("/api/auth/signup").json(&user_info).dispatch();
+		assert_eq!(signup_response.status(), Status::Ok);
 
-	let password_complaint: Value = json!({
-		"BasicRequirement": "password must contain at least one uppercase character"
-	});
+		let password_complaint: Value = json!({
+			"BasicRequirement": "password must contain at least one uppercase character"
+		});
 
-	assert_eq!(signup_response.into_json().as_ref(), Some(&password_complaint));
+		assert_eq!(signup_response.into_json().as_ref(), Some(&password_complaint));
 
-	let login_response = client.post("/api/auth/login").json(&user_info).dispatch();
-	assert_eq!(login_response.status(), Status::Ok);
+		let login_response = self.client.post("/api/auth/login").json(&user_info).dispatch();
+		assert_eq!(login_response.status(), Status::Ok);
 
-	let login_response_json: Value = login_response.into_json().unwrap();
-	assert_eq!(login_response_json["weak_hint"], password_complaint);
+		let login_response_json: Value = login_response.into_json().unwrap();
+		assert_eq!(login_response_json["weak_hint"], password_complaint);
 
-	Header::new("jwt", login_response_json["jwt"].as_str().unwrap().to_string())
+		Header::new("jwt", login_response_json["jwt"].as_str().unwrap().to_string())
+	}
 }
 
 #[test]
@@ -81,7 +83,7 @@ fn tasks() {
 		.body(PROJECT_NAME).dispatch();
 	assert_eq!(unauth_new_response.status(), Status::Unauthorized);
 
-	let jwt = create_test_account(&instance.client);
+	let jwt = instance.create_test_account();
 
 	let new_response = instance.client.post("/api/projects/new")
 		.body(PROJECT_NAME).header(jwt).dispatch();

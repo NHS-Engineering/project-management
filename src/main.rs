@@ -9,7 +9,10 @@ mod tasks;
 #[cfg(test)]
 mod test;
 
-use engineering_web_portal::{get_conn, run_migrations, copyright_message};
+use engineering_web_portal::{run_migrations, copyright_message};
+
+mod pool;
+use pool::DbManager;
 
 #[rocket::launch]
 fn rocket() -> _ {
@@ -17,8 +20,13 @@ fn rocket() -> _ {
 
 	run_migrations();
 
+	let manager = DbManager::default();
+	let pool = r2d2::Pool::builder()
+		.build(manager).unwrap();
+
 	rocket::build()
 		.manage(jwt::JWTKeys::generate())
+		.manage(pool)
 		.mount("/api/users", rocket::routes![users::info, users::all_users])
 		.mount("/api/auth", rocket::routes![auth::signup, auth::login, auth::invite, auth::redeem_invite, auth::change_password])
 		.mount("/api/projects", rocket::routes![projects::new, projects::list, projects::delete, projects::set_color])

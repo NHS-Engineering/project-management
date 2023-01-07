@@ -1,14 +1,13 @@
 use diesel::prelude::*;
 use rocket::serde::{Serialize, json::Json};
 use rocket::http::Status;
-use crate::{get_conn, jwt::JWTAuth};
+use crate::jwt::JWTAuth;
+use crate::pool::Conn;
 use crate::models::{NewProject, Project};
 
 #[rocket::post("/new", data = "<name>")]
-pub fn new(jwt: JWTAuth, name: String) {
+pub fn new(jwt: JWTAuth, mut conn: Conn, name: String) {
 	use crate::schema::projects;
-
-	let mut conn = get_conn();
 
 	let new_project = NewProject {
 		name,
@@ -17,7 +16,7 @@ pub fn new(jwt: JWTAuth, name: String) {
 
 	diesel::insert_into(projects::table)
 		.values(&new_project)
-		.execute(&mut conn).unwrap();
+		.execute(&mut *conn).unwrap();
 }
 
 #[derive(Serialize)]
@@ -27,11 +26,10 @@ pub struct ProjectList {
 }
 
 #[rocket::get("/list")]
-pub fn list() -> Json<ProjectList> {
+pub fn list(mut conn: Conn) -> Json<ProjectList> {
 	use crate::schema::projects::dsl::*;
 
-	let mut conn = get_conn();
-	let projects_list: Vec<Project> = projects.load(&mut conn).unwrap();
+	let projects_list: Vec<Project> = projects.load(&mut *conn).unwrap();
 
 	Json(ProjectList {
 		projects: projects_list
@@ -39,12 +37,10 @@ pub fn list() -> Json<ProjectList> {
 }
 
 #[rocket::delete("/delete/<id>")]
-pub fn delete(jwt: JWTAuth, id: i32) -> (Status, &'static str) {
+pub fn delete(jwt: JWTAuth, mut conn: Conn, id: i32) -> (Status, &'static str) {
 	use crate::schema::projects::dsl;
 
-	let mut conn = get_conn();
-
-	match diesel::delete(dsl::projects.find(id).filter(dsl::owner_id.eq(jwt.user_id))).execute(&mut conn) {
+	match diesel::delete(dsl::projects.find(id).filter(dsl::owner_id.eq(jwt.user_id))).execute(&mut *conn) {
 		Ok(n) if n == 1 => (Status::Ok, "project deleted"),
 		Err(_) => (Status::BadRequest, "project not deleted"),
 		_ => unreachable!("multiple projects deleted?")
@@ -52,7 +48,7 @@ pub fn delete(jwt: JWTAuth, id: i32) -> (Status, &'static str) {
 }
 
 #[rocket::post("/set_color/<id>", data = "<color>")]
-pub fn set_color(jwt: JWTAuth, id: i32, color: String) -> (Status, &'static str) {
+pub fn set_color(jwt: JWTAuth, mut conn: Conn, id: i32, color: String) -> (Status, &'static str) {
 	use crate::schema::projects::dsl;
 
 	let mut color_chars = color.chars();
@@ -76,10 +72,8 @@ pub fn set_color(jwt: JWTAuth, id: i32, color: String) -> (Status, &'static str)
 		return (Status::BadRequest, "invalid color length");
 	}
 
-	let mut conn = get_conn();
-
 	let owned_project = dsl::id.eq(id).and(dsl::owner_id.eq(jwt.user_id));
-	match diesel::update(dsl::projects.filter(owned_project)).set(dsl::color.eq(color)).execute(&mut conn) {
+	match diesel::update(dsl::projects.filter(owned_project)).set(dsl::color.eq(color)).execute(&mut *conn) {
 		Ok(n) if n == 1 => (Status::Ok, "color changed"),
 		Err(_) => (Status::BadRequest, "color not changed"),
 		_ => unreachable!("multiple colors changed?")

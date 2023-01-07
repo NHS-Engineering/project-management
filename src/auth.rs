@@ -1,9 +1,10 @@
 use rocket::serde::{Deserialize, json::Json};
 use diesel::prelude::*;
 use jwt_simple::prelude::*;
-use engineering_web_portal::{get_conn, get_url};
+use engineering_web_portal::get_url;
 use rocket::http::{Status, ContentType};
 use crate::jwt::{JWTKeys, JWTAuth, JWTNewAccount};
+use crate::pool::Conn;
 
 const BANNED_WORDS: [&'static str; 5] = ["lion", "engineering", "engineer", "nhs", "nhsd"];
 
@@ -53,14 +54,13 @@ pub struct UserInfo<'a> {
 
 #[cfg(any(test, feature = "debug"))]
 #[rocket::post("/signup", data = "<user_info>")]
-pub fn signup(user_info: Json<UserInfo<'_>>) -> Json<PasswordValidity> {
+pub fn signup(mut conn: Conn, user_info: Json<UserInfo<'_>>) -> Json<PasswordValidity> {
 	use crate::models::NewUser;
 	use sha3::{Sha3_512, Digest};
 	use crate::schema::users;
 
 	// yes I know, and the answer is "not in my threat model"
 	let hashed_password = format!("{:x}", Sha3_512::digest(user_info.password));
-	let mut conn = get_conn();
 	let new_user = NewUser {
 		username: user_info.username,
 		hashed_password
@@ -68,7 +68,7 @@ pub fn signup(user_info: Json<UserInfo<'_>>) -> Json<PasswordValidity> {
 
 	diesel::insert_into(users::table)
 		.values(&new_user)
-		.execute(&mut conn).unwrap();
+		.execute(&mut *conn).unwrap();
 
 	Json(PasswordValidity::check(user_info.password))
 }
@@ -100,13 +100,12 @@ pub struct AuthResponse {
 }
 
 #[rocket::post("/login", data = "<user_info>")]
-pub fn login(user_info: Json<UserInfo<'_>>, keyring: &rocket::State<JWTKeys>) -> (Status, Option<Json<AuthResponse>>) {
+pub fn login(mut conn: Conn, user_info: Json<UserInfo<'_>>, keyring: &rocket::State<JWTKeys>) -> (Status, Option<Json<AuthResponse>>) {
 	use crate::schema::users::dsl;
 
-	let mut conn = get_conn();
-	let (user_id, is_admin): (i32, bool) = dsl::users.select((dsl::id, dsl::is_admin)).filter(dsl::username.eq(user_info.username)).first(&mut conn).unwrap();
+	let (user_id, is_admin): (i32, bool) = dsl::users.select((dsl::id, dsl::is_admin)).filter(dsl::username.eq(user_info.username)).first(&mut *conn).unwrap();
 
-	match password_correct(&mut conn, user_id, &user_info.password) {
+	match password_correct(&mut *conn, user_id, &user_info.password) {
 		true => {
 			let weak_hint = PasswordValidity::check(user_info.password);
 
@@ -157,7 +156,7 @@ pub fn invite(jwt: JWTAuth, username: String, keyring: &rocket::State<JWTKeys>) 
 }
 
 #[rocket::post("/redeem_invite", data = "<password>")]
-pub fn redeem_invite(jwt: JWTNewAccount, password: String) -> (Status, Json<PasswordValidity>) {
+pub fn redeem_invite(jwt: JWTNewAccount, mut conn: Conn, password: String) -> (Status, Json<PasswordValidity>) {
 	use crate::models::NewUser;
 	use sha3::{Sha3_512, Digest};
 	use crate::schema::users;
@@ -175,11 +174,9 @@ pub fn redeem_invite(jwt: JWTNewAccount, password: String) -> (Status, Json<Pass
 		hashed_password
 	};
 
-	let mut conn = get_conn();
-
 	diesel::insert_into(users::table)
 		.values(&new_user)
-		.execute(&mut conn).unwrap();
+		.execute(&mut *conn).unwrap();
 
 	(Status::Ok, Json(PasswordValidity::Valid))
 }
@@ -200,11 +197,9 @@ pub enum PasswordChangeResult {
 }
 
 #[rocket::post("/change_password", data = "<change_info>")]
-pub fn change_password(jwt: JWTAuth, change_info: Json<PasswordChangeInfo<'_>>) -> (Status, Json<PasswordChangeResult>) {
+pub fn change_password(jwt: JWTAuth, mut conn: Conn, change_info: Json<PasswordChangeInfo<'_>>) -> (Status, Json<PasswordChangeResult>) {
 	use sha3::{Sha3_512, Digest};
 	use crate::schema::users::dsl;
-
-	let mut conn = get_conn();
 
 	match password_correct(&mut conn, jwt.user_id, change_info.old_password) {
 		true => {
@@ -214,7 +209,7 @@ pub fn change_password(jwt: JWTAuth, change_info: Json<PasswordChangeInfo<'_>>) 
 
 					diesel::update(dsl::users.find(jwt.user_id))
 						.set(dsl::hashed_password.eq(new_hashed))
-						.execute(&mut conn).unwrap();
+						.execute(&mut *conn).unwrap();
 
 					(Status::Ok, Json(PasswordChangeResult::Success))
 				},

@@ -1,7 +1,7 @@
 use rocket::serde::{Deserialize, json::Json};
 use diesel::prelude::*;
 use jwt_simple::prelude::*;
-use engineering_web_portal::get_url;
+use crate::get_url;
 use rocket::http::{Status, ContentType};
 use crate::jwt::{JWTKeys, JWTAuth, JWTNewAccount};
 use crate::pool::Conn;

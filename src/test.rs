@@ -1,40 +1,29 @@
-use super::rocket;
+use engineering_web_portal::construct_rocket;
 use rocket::local::blocking::Client;
 use rocket::http::{Status, Header};
 use rocket::serde::json::{Value, json};
+use temp_dir::TempDir;
 
-use std::sync::{Mutex, MutexGuard};
-use lazy_static::lazy_static;
-use temp_file::TempFile;
-
-lazy_static! {
-	pub static ref LOCK: Mutex<()> = Mutex::new(());
-}
-
-struct IsolatedClient<'a> {
+struct IsolatedClient {
 	client: Client,
 
-	// compiler generated Drop gives us RAII on a Client
+	// compiler generated Drop gives us RAII on temporary database
 	#[allow(dead_code)]
-	temp_db: TempFile,
-	#[allow(dead_code)]
-	lock: MutexGuard<'a, ()>
+	tmp_dir: TempDir
 }
 
-impl<'a> std::default::Default for IsolatedClient<'a> {
+impl std::default::Default for IsolatedClient {
 	fn default() -> Self {
-		let lock = LOCK.lock().unwrap();
-		let temp_db = TempFile::new().unwrap();
-		let temp_db_path = temp_db.path();
-		std::env::set_var("OVERRIDE_DB", temp_db_path.as_os_str());
-
 		// makes tests working directory agnostic, don't expect testing static files to work correctly...
-		std::env::set_var("OVERRIDE_STATIC", temp_db_path.ancestors().nth(2).unwrap());
+		let tmp_dir = TempDir::new().unwrap();
+		let tmp_path = tmp_dir.path();
+		std::env::set_var("OVERRIDE_STATIC", tmp_path.as_os_str());
+
+		let rocket = construct_rocket(tmp_path.join("db.sqlite").to_str().unwrap());
 
 		Self {
-			client: Client::tracked(rocket()).unwrap(),
-			temp_db,
-			lock
+			client: Client::tracked(rocket).unwrap(),
+			tmp_dir
 		}
 	}
 }
@@ -42,7 +31,7 @@ impl<'a> std::default::Default for IsolatedClient<'a> {
 static TEST_USERNAME: &'static str = "test_user";
 static TEST_PASSWORD: &'static str = "test_password";
 
-impl<'c> IsolatedClient<'c> {
+impl IsolatedClient {
 	fn create_test_account<'a>(&self) -> Header<'a> {
 		let user_info: Value = json!({
 			"username": TEST_USERNAME,

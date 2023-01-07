@@ -432,12 +432,11 @@ dependencies = [
  "diesel_migrations",
  "fast_qr",
  "jwt-simple",
- "lazy_static",
  "libsqlite3-sys",
  "r2d2",
  "rocket",
  "sha3",
- "temp-file",
+ "temp-dir",
 ]
 
 [[package]]
@@ -1674,10 +1673,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "temp-file"
-version = "0.1.7"
+name = "temp-dir"
+version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f4479870ee948e4c5c3fc4774b46aa73eedf97d84503a9b90922c1bb19a73a8d"
+checksum = "af547b166dd1ea4b472165569fc456cfb6818116f854690b0ff205e636523dab"
 
 [[package]]
 name = "tempfile"

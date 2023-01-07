@@ -2,16 +2,26 @@ use diesel::{sql_query, RunQueryDsl};
 use diesel::sqlite::SqliteConnection;
 use diesel::Connection;
 use r2d2::{ManageConnection, PooledConnection, Pool};
+use crate::get_raw_conn;
 
-#[derive(Default)]
-pub struct DbManager;
+pub struct DbManager {
+	db: String
+}
+
+impl DbManager {
+	pub fn from_db<S: Into<String>>(db: S) -> Self {
+		Self {
+			db: db.into()
+		}
+	}
+}
 
 impl ManageConnection for DbManager {
 	type Connection = SqliteConnection;
 	type Error = std::convert::Infallible; // yeah this is a blatent lie, I just don't feel like implementing Error
 
 	fn connect(&self) -> Result<Self::Connection, Self::Error> {
-		let mut conn = engineering_web_portal::get_raw_conn();
+		let mut conn = get_raw_conn(&self.db);
 		sql_query("PRAGMA foreign_keys = ON;").execute(&mut conn).unwrap();
 		Ok(conn)
 	}

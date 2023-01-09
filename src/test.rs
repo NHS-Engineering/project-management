@@ -1,4 +1,4 @@
-use engineering_web_portal::construct_rocket;
+use crate::construct_rocket;
 use rocket::local::blocking::Client;
 use rocket::http::{Status, Header};
 use rocket::serde::json::{Value, json};

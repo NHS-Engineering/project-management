@@ -1,6 +1,9 @@
 use diesel::sqlite::SqliteConnection;
 use diesel::Connection;
 
+#[cfg(test)]
+mod test;
+
 mod pool;
 use pool::DbManager;
 

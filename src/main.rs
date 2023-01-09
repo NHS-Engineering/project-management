@@ -1,6 +1,3 @@
-#[cfg(test)]
-mod test;
-
 use engineering_web_portal::construct_rocket;
 
 #[rocket::launch]

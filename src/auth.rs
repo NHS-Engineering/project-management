@@ -6,7 +6,7 @@ use rocket::http::{Status, ContentType};
 use crate::jwt::{JWTKeys, JWTAuth, JWTNewAccount};
 use crate::pool::Conn;
 
-const BANNED_WORDS: [&'static str; 5] = ["lion", "engineering", "engineer", "nhs", "nhsd"];
+const BANNED_WORDS: [&'static str; 6] = ["lion", "engineering", "engineer", "nhs", "nhsd", "password"];
 
 #[derive(Serialize)]
 #[serde(crate = "rocket::serde")]

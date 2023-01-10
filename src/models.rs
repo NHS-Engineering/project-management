@@ -17,6 +17,13 @@ pub struct UserInfo {
 	pub is_admin: bool
 }
 
+#[derive(Queryable, Serialize)]
+#[serde(crate = "rocket::serde")]
+pub struct UserPreview {
+	pub id: i32,
+	pub username: String
+}
+
 #[derive(Insertable)]
 #[diesel(table_name = crate::schema::users)]
 pub struct NewUser<'a> {

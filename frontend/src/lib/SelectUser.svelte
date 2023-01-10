@@ -5,7 +5,7 @@
 	export let selected_user_id;
 
 	async function fetchUsers() {
-		let resp = await fetch("/api/users/list", {
+		let resp = await fetch("/api/users/preview", {
 			"headers": {
 				"jwt": $jwt
 			}

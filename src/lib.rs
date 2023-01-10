@@ -52,7 +52,7 @@ pub fn construct_rocket(db: &str) -> rocket::Rocket<rocket::Build> {
 	rocket::build()
 		.manage(jwt::JWTKeys::generate())
 		.manage(pool)
-		.mount("/api/users", rocket::routes![users::info, users::all_users])
+		.mount("/api/users", rocket::routes![users::info, users::preview])
 		.mount("/api/auth", rocket::routes![auth::signup, auth::login, auth::invite, auth::redeem_invite, auth::change_password])
 		.mount("/api/projects", rocket::routes![projects::new, projects::list, projects::delete, projects::set_color])
 		.mount("/api/tasks", rocket::routes![tasks::new, tasks::list, tasks::delete, tasks::set_done, tasks::assign])

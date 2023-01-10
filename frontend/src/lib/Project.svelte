@@ -150,7 +150,7 @@
 			<p>tasks:</p>
 			<div class="list">
 				{#each tasks as task}
-					<Task {task} {isOwner} on:deleted={forceRefreshTasks}/>
+					<Task {isOwner} bind:task on:deleted={forceRefreshTasks}/>
 				{:else}
 					<p>this project has no tasks</p>
 				{/each}

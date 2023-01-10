@@ -3,6 +3,7 @@
 	import { fetchUser } from "./users.js";
 	import { jwt, jwt_claims } from "./stores.js";
 	import Modal from "./Modal.svelte";
+	import SelectUser from "./SelectUser.svelte";
 
 	export let task;
 	export let isOwner;
@@ -21,6 +22,23 @@
 			dispatch("deleted")
 		} else {
 			alert("failed to delete task");
+		}
+	}
+
+	let selected_user_id = task.assignee_id;
+
+	async function selectUser() {
+		let resp = await fetch(`/api/tasks/assign/${task.id}/${selected_user_id}`, {
+			"method": "POST",
+			"headers": {
+				"jwt": $jwt
+			}
+		});
+
+		if (resp.ok) {
+			task.assignee_id = selected_user_id;
+		} else {
+			alert("failed to assign user to task");
 		}
 	}
 
@@ -52,7 +70,12 @@
 		{#await assignee}
 			<p>fetching info...</p>
 		{:then user}
-			<p>assigned to: {user.username}</p>
+			{#if isOwner}
+				<SelectUser bind:selected_user_id/>
+				<button on:click={selectUser}>change assignee</button>
+			{:else}
+				<p>assigned to: {user.username}</p>
+			{/if}
 		{:catch}
 			<p>ERROR: assigned to user with id {task.assignee_id}</p>
 		{/await}

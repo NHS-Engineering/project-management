@@ -80,6 +80,35 @@ pub fn set_done(jwt: JWTAuth, mut conn: Conn, id: i32, state: bool) -> (Status, 
 	match changed {
 		0 => (Status::BadRequest, "no tasks changed"),
 		1 => (Status::Ok, "task changed"),
-		_ => unreachable!("multiple tasks changed?")
+		_ => unreachable!("multiple tasks marked done?")
+	}
+}
+
+#[rocket::post("/assign/<id>/<assignee_id>")]
+pub fn assign(jwt: JWTAuth, mut conn: Conn, id: i32, assignee_id: i32) -> (Status, &'static str) {
+	use crate::schema::projects;
+	use crate::schema::tasks;
+	use crate::schema::users;
+
+	let changed = conn.transaction(|conn| {
+		let task = tasks::dsl::tasks.find(id);
+
+		let owned_projects: i64 = projects::dsl::projects.filter(projects::dsl::id.eq_any(
+				task.select(tasks::dsl::project_id)
+			).and(projects::dsl::owner_id.eq(jwt.user_id))).count().first(conn).unwrap();
+
+		if owned_projects != 1 { return Ok(0); }
+
+		let valid_assignees: i64 = users::dsl::users.find(assignee_id).count().first(conn).unwrap();
+
+		if valid_assignees != 1 { return Ok(0); }
+
+		diesel::update(task).set(tasks::dsl::assignee_id.eq(assignee_id)).execute(conn)
+	}).unwrap();
+
+	match changed {
+		0 => (Status::BadRequest, "task not assigned"),
+		1 => (Status::Ok, "task assigned"),
+		_ => unreachable!("multiple assignees set?")
 	}
 }

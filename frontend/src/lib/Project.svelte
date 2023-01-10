@@ -119,6 +119,7 @@
 	}
 
 	$: isOwner = $jwt_claims["user_id"] === project.owner_id;
+	const notOwnerTip = "you cannot manage this project because you are not the owner";
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -140,7 +141,7 @@
 
 {#if modal_visible}
 	<Modal on:close={() => modal_visible = false}>
-		<p>project: {project.name}</p>
+		<p title={isOwner ? undefined : notOwnerTip}>project: {project.name}</p>
 		{#if isOwner}
 			<input type="color" bind:value={projectColor} on:change={updateColor}>
 		{/if}
@@ -162,8 +163,6 @@
 			{#if isOwner}
 				<button on:click={newTask}>New Task</button>
 				<button class="dangerous" on:click={deleteProject}>Delete Project</button>
-			{:else}
-				<p>you are not the owner of this project so you can't manage it</p>
 			{/if}
 		{/if}
 	</Modal>

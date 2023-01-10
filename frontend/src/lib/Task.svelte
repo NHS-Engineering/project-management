@@ -57,12 +57,13 @@
 	}
 
 	$: isAssigned = $jwt_claims["user_id"] === task.assignee_id;
+	const notAssignedTip = "you cannot mark this task as done because you are not assigned to it";
 
 	let show_details = false;
 </script>
 
 <div class={show_details ? "seperate" : undefined}>
-	<input type="checkbox" id={task.id} bind:checked={task.done} on:input={setDone} disabled={!isAssigned}>
+	<input type="checkbox" id={task.id} bind:checked={task.done} on:input={setDone} disabled={!isAssigned} title={isAssigned ? undefined : notAssignedTip}>
 	<label for={task.id}>{task.name}</label>
 
 	{#if show_details}

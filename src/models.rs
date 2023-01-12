@@ -28,7 +28,8 @@ pub struct UserPreview {
 #[diesel(table_name = crate::schema::users)]
 pub struct NewUser<'a> {
 	pub username: &'a str,
-	pub hashed_password: String
+	pub hashed_password: String,
+	pub is_admin: bool
 }
 
 #[derive(Queryable, Serialize)]

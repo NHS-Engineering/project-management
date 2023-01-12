@@ -40,12 +40,15 @@ mod auth;
 mod projects;
 mod tasks;
 
+mod setup;
+
 pub fn construct_rocket(db: &str) -> rocket::Rocket<rocket::Build> {
 	copyright_message();
 
 	run_migrations(db);
 
 	let manager = DbManager::from_db(db);
+	setup::setup(&manager);
 	let pool = r2d2::Pool::builder()
 		.build(manager).unwrap();
 

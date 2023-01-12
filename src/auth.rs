@@ -63,7 +63,8 @@ pub fn signup(mut conn: Conn, user_info: Json<UserInfo<'_>>) -> Json<PasswordVal
 	let hashed_password = format!("{:x}", Sha3_512::digest(user_info.password));
 	let new_user = NewUser {
 		username: user_info.username,
-		hashed_password
+		hashed_password,
+		is_admin: true
 	};
 
 	diesel::insert_into(users::table)
@@ -171,7 +172,8 @@ pub fn redeem_invite(jwt: JWTNewAccount, mut conn: Conn, password: String) -> (S
 
 	let new_user = NewUser {
 		username: &jwt.username,
-		hashed_password
+		hashed_password,
+		is_admin: false
 	};
 
 	diesel::insert_into(users::table)
